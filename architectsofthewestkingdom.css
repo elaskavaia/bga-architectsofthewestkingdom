@@ -1,0 +1,1085 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * ArchitectsOfTheWestKingdom implementation : © <Nicolas Gocel> <nicolas.gocel@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * architectsofthewestkingdom.css
+ *
+ * ArchitectsOfTheWestKingdom stylesheet
+ *
+ */
+ 
+@font-face {
+ font-family: "official";
+ src: url("img/ConcursoItalian.otf")
+}
+
+#newRound
+{
+	top: 318px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 350px; 
+	width: 2000px;
+	height: 1249px;	
+	position: absolute;
+	font-size: 350px;
+	z-index: 10;
+	pointer-events: none;
+ 	font-family: "official";
+ 	color: white;
+	-webkit-text-stroke: 3px black;
+	-webkit-transform: scale(0); 
+	transform-origin: center;
+}
+
+.popit {
+  -webkit-animation: popit 2s;
+       animation: popit 2s;
+    -webkit-animation-fill-mode: forwards;
+     animation-fill-mode: forwards;
+}
+
+@-webkit-keyframes "popit" {
+    0% {  -webkit-transform: scale(0); }
+    20% {  -webkit-transform: scale(1);}
+    80% {  -webkit-transform: scale(1);}
+    100% {  -webkit-transform: scale(0); }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.appears
+{	  	
+	 -webkit-animation: appears 1s  forwards;
+       animation: appears 1s  forwards;	
+}
+
+@-webkit-keyframes "appears" {
+    0% { -webkit-transform: scale(0); }
+    100% { -webkit-transform: scale(1); }
+}
+
+#arc-overall {
+	display: flex;
+	flex-direction: column;
+	align-items:center;
+	justify-content:center;
+	margin-top: 10px;
+}
+
+#gboard
+{
+	position: relative;
+	transform-origin: top left;
+}
+
+.board {
+    background-image: url('img/ArchitectsBoard.png');
+    background-repeat: no-repeat;
+	width: 2000px;
+	height: 1333px;	
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+	position: relative;
+    border-radius: 5px;
+}
+
+
+
+.playerleft {
+	display: flex;
+	align-items:center;
+	justify-content:center;
+	flex-direction: column;
+	gap : 20px;
+    font-size: 37px;
+	width: 4%;
+}
+
+.playeroveroverall
+{
+	position: relative;
+	width: 2000px;
+	background-color:#ffffff55;
+	border: solid 1px white;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+.playeroverall
+{
+	display: flex;
+	justify-content:space-around;
+	position: relative;
+	width: 2000px;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+.middle {
+	display: flex;
+	align-items:center;
+	flex-direction: column;
+	width: 65%;
+	gap: 10px;
+}
+
+.cards
+{
+	display: flex;
+	align-items:center;
+	justify-content:flex-start;
+	position: relative;
+	width: 100%;
+	gap: 10px;
+	flex-wrap:  wrap;	
+	gap: 10px;
+}
+
+.pname {
+	font-family: "official";
+	font-size: 30px;
+    letter-spacing: 1px;
+}
+
+.overplayerboard
+{
+	width: 31%;
+}
+	
+.playerboard {
+    background-image: url('img/PlayerBoards.png');
+    background-repeat: no-repeat;
+    background-size: 200% 1000%;
+    width: 600px;
+    height: 350px;
+    position: relative;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+	border-radius: 5px;
+}
+
+.building
+{
+    background-image: url('img/Buildings.png');
+    background-repeat: no-repeat;
+    background-size: 600% 800%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+    width: 165px;
+    height: 268px;
+    border-radius: 10px;
+    position: relative;
+	transition: 0.5s; 
+}
+
+#buildingstack {
+    top: 1030px;
+    left: 718px;
+    position: absolute;
+
+}
+
+
+.officialtext {
+	color: white;
+	font-family: "official";
+	font-size: 20px;
+	display: flex;
+	justify-content:flex-end;	
+	flex-direction: column;
+    letter-spacing: 1px;
+	text-shadow: black 1px 0 5px;
+	position: absolute;
+}
+
+.btext
+{
+	position: absolute;
+    font-size: 30px;
+	width: 400px;
+    text-align: center;
+}
+
+.building .building_name {
+    width: 108px;
+    height: 39px;
+    left: 4px;
+    top: 172px;
+	position: absolute;
+    font-size: 20px;
+    text-align: left;
+}
+
+.building_most {
+	font-size: 15px;
+    width: 38px;
+    height: 39px;
+    left: 2px;
+    top: 210px;
+    text-align: right;
+	position: absolute;
+	text-shadow: 0px;
+}
+
+.building_per {
+    font-size: 10px;
+    width: 30px;
+    height: 15px;
+    left: 30px;
+    top: 230px;
+    text-align: center;
+	position: absolute;
+	text-shadow: 0px;
+}
+
+.apprentice
+{
+    background-image: url('img/Apprentices.png');
+    background-repeat: no-repeat;
+    background-size: 600% 800%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+    width: 165px;
+    height: 268px;
+    border-radius: 10px;
+    position: relative;
+	transition: 0.5s; 
+}
+
+.building.selectable,
+.apprentice.selectable {
+	border: solid 2px red;
+	filter: drop-shadow(1px 1px 17px red);
+	-webkit-filter: drop-shadow(1px 1px 17px red);	
+}
+
+.apprentice_name {
+    font-size: 16px;
+	width: 172px !important;
+    height: 21px;
+    left: 5px;
+    top: 211px;
+    text-align: right;
+	position: absolute;
+	transform: rotate(-90deg);
+	transform-origin: top left;
+}
+
+.apprentice_target {
+    font-size: 13px;
+    width: 172px !important;
+    height: 21px;
+    left: -11px;
+    top: 191px;
+    text-align: right;
+    position: absolute;
+}
+
+.board_name {
+	width: 316px;
+    height: 32px;
+    left: 17px;
+    top: 216px;
+	position: absolute;
+}
+
+
+.board .officialtext.small
+{
+    font-size: 20px;
+	width: 400px;
+    text-align: center;
+}
+.board .officialtext.per
+{
+    font-size: 16px;
+	width: 400px;
+}
+
+#txtguildhall { top: 46px; left: 54px;}
+#txtcathedral { top: 42px; left: 262px;  text-align: right;}
+#txtkingsstorehouse { top: 519px; left: 340px;}
+#txtmines { top: 46px; left: 881px;}
+#txttaxstand { top: 740px; left: 42px;}
+#txtblackmarket { top: 931px; left: 48px;  text-align: right;}
+#txtsilversmith { top: 484px; left: 623px;}
+#txttowncenter { top: 722px; left: 643px;}
+#txtworkshop { top: 965px; left: 829px;}
+#txtforest { top: 562px; left: 865px;}
+#txtquarry { top: 336px; left: 1036px;}
+#txtguardhouse { top: 41px; left: 1287px;}
+#txtor1 { top: 176px; left: 1291px;}
+#txtor2 { top: 256px; left: 1291px;}
+#txtor3 { top: 349px; left: 1291px;}
+#txtor4 { top: 1082px; left: 827px;}
+#txtor5 { top: 645px; left: 339px;}
+#txtor6 { top: 1132px; left: 209px;}
+#txtor7 { top: 125px; left: 879px;}
+#txtactionper1 { top: 90px; left: 1102px; text-align: right;}
+#txtactionper2 { top: 571px; left: 145px; text-align: right;}
+#txtper1 { top: 142px; left: 1261px;}
+#txtper2 { top: 385px; left: 1031px;}
+#txtper3 { top: 159px; left: 871px;}
+#txtper4 { top: 95px; left: 904px;}
+#txtper5 { top: 611px; left: 869px;}
+#txtper6 { top: 534px; left: 647px;}
+#txtper7 { top: 1121px; left: 840px;}
+#txtperadditional { top: 799px; left: 823px; width: 65px; height: 37px; font-size: 12px; justify-content:center; }
+#txtmost { top: 438px; left: 1449px; text-align: right;}
+
+.phcard {
+	width: 165px;
+    height: 268px;
+    position: absolute;
+}
+
+#phapprentice1 {top: 700px; left: 1227px;}
+#phapprentice2 {top: 1031px; left: 1227px;}
+#phapprentice3 {top: 700px; left: 1418px;}
+#phapprentice4 {top: 1031px; left: 1418px;}
+#phapprentice5 {top: 700px; left: 1608px;}
+#phapprentice6 {top: 1031px; left: 1608px;}
+#phapprentice7 {top: 700px; left: 1798px;}
+#phapprentice8 {top: 1031px; left: 1798px;}
+
+.phsmallcard {
+	width: 130px;
+    height: 209px;
+    position: absolute;
+}
+
+#phblackmarket1 {top: 1090px; left:185px;}
+#phblackmarket2 {top: 1090px; left:500px;}
+
+.BMCard
+{
+    background-image: url('img/BlackMarket.png');
+    background-repeat: no-repeat;
+    background-size: 1000% 300%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+    width: 130px;
+    height: 209px;
+    border-radius: 10px;
+    position: relative;
+	transition: 0.5s; 
+}
+
+.anatooltip .BMCard.paid0,
+.anatooltip .BMCard.paid1
+{
+	display: inline-block;
+	margin: 10px; 
+}
+
+.paid0 {
+	background-position: 11.11% 100%;
+}
+
+.paid1 {
+	background-position: 0% 100%;
+}
+
+.RewardCard
+{
+    background-image: url('img/Rewards.png');
+    background-repeat: no-repeat;
+    background-size: 600% 200%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+    width: 130px;
+    height: 209px;
+    border-radius: 10px;
+    position: absolute;
+}
+
+#phreward {
+    top: 124px;
+    left: 807px;
+	width: 130px;
+    height: 209px;
+    position: absolute;
+}
+
+.meeple {
+	background-image: url('img/meeples.png');
+    background-repeat: no-repeat;
+    background-size: 500% 100%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+    width: 34px;
+    height: 56px;
+    border-radius: 10px;
+	transition: 0.5s; 
+    position: relative;
+}
+
+#guildhall {
+	top: 131px;
+    left: 135px;
+    height: 286px;
+    position: absolute;
+    display: flex;
+	justify-content:flex-start;	
+	align-content: flex-start;
+	flex-wrap:  wrap;
+	gap: 5.5px;
+}
+
+.gh1p {width: 140px;}
+.gh2p {width: 140px;}
+.gh3p {width: 178px;}
+.gh4p {width: 216px;}
+.gh5p {width: 254px;}
+
+#guildhall .meeple {
+	margin-top: 14px;	
+}
+
+.meeplelocation {
+	position: absolute;
+	display: flex;
+	justify-content:center;	
+	align-content: flex-start;
+	flex-wrap:  wrap;
+	gap: 2.5px;
+    width: 168px;
+    height: 127px;
+	pointer-events: none;
+}
+
+#prison { top: 36px; left: 1656px; width: 312px; height: 308px; align-content: center;}
+#guardhouse {     top: 399px; left: 1570px;}
+#quarry {     top: 404px; left: 1166px;}
+#mines {     top: 181px; left: 1002px;}
+#forest {     top: 635px; left: 993px;}
+#silversmith {     top: 557px; left: 748px;}
+#towncenter {     top: 831px; left: 789px;}
+#workshop {     top: 1145px; left: 949px;}
+#taxstand {     top: 819px; left: 151px;}
+#storehouse {     top: 705px; left: 452px;}
+
+#blackmarketa { top: 1022px; left: 224px; width: 50px; height: 50px;}
+#blackmarketb { top: 1022px; left: 381px; width: 50px; height: 50px;}
+#blackmarketc { top: 1022px; left: 537px; width: 50px; height: 50px;}
+
+.marker {
+	width: 42px;
+    height: 38px;
+    background-color: yellow;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+	display: inline-block;
+	margin-right: 5px;
+	transition: 0.5s; 
+}
+
+.marker::after {
+    border-right: 42px solid transparent;
+    content: "";
+    top: 36px;
+    position: absolute;
+    height: 0;
+}
+.marker::before {
+    border-left: 42px solid transparent;
+    content: "";
+    top: 36px;
+    position: absolute;
+    height: 0;
+}
+
+.color325089.marker {background-color: #325089;}
+.color325089.marker::after { border-top: 10px solid #325089;}
+.color325089.marker::before { border-top: 10px solid #325089;}
+.color0a7134.marker {background-color: #0a7134;}
+.color0a7134.marker::after { border-top: 10px solid #0a7134;}
+.color0a7134.marker::before { border-top: 10px solid #0a7134;}
+.color4e186f.marker {background-color: #4e186f;}
+.color4e186f.marker::after { border-top: 10px solid #4e186f;}
+.color4e186f.marker::before { border-top: 10px solid #4e186f;}
+.colora3131e.marker {background-color: #a3131e;}
+.colora3131e.marker::after { border-top: 10px solid #a3131e;}
+.colora3131e.marker::before { border-top: 10px solid #a3131e;}
+.colorb2a80e.marker {background-color: #b2a80e;}
+.colorb2a80e.marker::after { border-top: 10px solid #b2a80e;}
+.colorb2a80e.marker::before { border-top: 10px solid #b2a80e;}
+
+.cathedralline { position: absolute; left: 618px; }
+
+#cathedral0 { top: 368px;}
+#cathedral1 { top: 316px;}
+#cathedral2 { top: 261px;}
+#cathedral3 { top: 205px;}
+#cathedral4 { top: 151px;}
+#cathedral5 { top: 95px;}
+
+#bmreset { position: absolute;
+    width: 198px;
+    height: 139px;
+    left: 1768px;
+    top: 345px;}
+
+
+.virtue { position: absolute; left: 7px; height: 90px; width: 45px; }
+.virtue .marker {margin-top: -29px;  display: block;}
+
+#virtue0 { top: 1225px;}
+#virtue1 { top: 1160px;}
+#virtue2 { top: 1095px;}
+#virtue3 { top: 1030px;}
+#virtue4 { top: 965px;}
+#virtue5 { top: 897px;}
+#virtue6 { top: 833px;}
+#virtue7 { top: 769px;}
+#virtue8 { top: 703px;}
+#virtue9 { top: 640px;}
+#virtue10 { top: 574px;}
+#virtue11 { top: 505px;}
+#virtue12 { top: 439px;}
+#virtue13 { top: 370px;}
+#virtue14 { top: 306px;}
+
+.coin {
+	background-image: url('img/sprites.png');
+    background-repeat: no-repeat;
+    background-size: 1100% 200%;
+    background-position: 50% 0%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+	transition: 0.5s; 
+    width: 75px;
+    height: 75px;
+}
+
+#taxcoins {
+	position: absolute;
+	top: 487px;
+    left: 118px;
+    width: 242px;
+    height: 218px;
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+    
+.taxfont { position: relative; height: 50px; font-size: 44px}
+#taxcpt {margin-top: -5px;}
+
+.arcicon {
+	background-image: url('img/sprites.png');
+    background-repeat: no-repeat;
+    background-size: 1100% 200%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+	transition: 0.5s; 
+    width: 40px;
+    height: 40px;
+}
+
+.ressourcesboard {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 10px;
+    left: 134px;
+   	color: white;
+	font-family: "official";
+	font-size: 28px;
+    letter-spacing: 1px;
+	text-shadow: black 1px 0 5px;
+}
+
+.ressourcesboard.line2
+{
+    top: 54px;	
+    left: 176px;
+} 
+.ressourcesboard.line3
+{
+    top: 105px;	
+} 
+.ressourcesboard.line4
+{
+    top: 158px;	
+    left: 118px;
+} 
+
+.resnb {
+	margin-left: 15px;
+	margin-right: 6px;
+}
+
+.res1 {background-position: 0% -2%; }
+.res2 {background-position: 10% 0%; }
+.res3 {background-position: 20% 0%; }
+.res4 {background-position: 30% 0%; }
+.res5 {background-position: 40% 0%; }
+.res6 {background-position: 50% 0%; }
+.res7 {background-position: 60% 0%; }
+.res8 {background-position: 70% 0%; }
+.res9 {background-position: 90% 0%; }
+.res10 {background-position: 100% 0%; }
+.res11 {background-position: 0% 100%; }
+.res12 {background-position: 20% 100%; }
+.res13 {background-position: 40% 100%; }
+.res14 {background-position: 30% 100%; }
+
+.resmeeple {
+	background-image: url('img/meeples.png');
+    background-repeat: no-repeat;
+    background-size: 500% 100%;
+	filter: drop-shadow(1px 1px 1px black);
+	-webkit-filter: drop-shadow(1px 1px 2px black);
+    width: 26px;
+    height: 40px;
+	transition: 0.5s; 
+}
+ 
+
+.meeplelocation.pboard {
+	top: -9px;
+    left: 17px;
+    width: 120px;
+    height: 190px;
+}
+
+.meeplelocation .meeple {
+	width: 28px;
+	height: 47px;
+}
+
+.pboard .meeple {
+	width: 19px;
+	height: 31px;
+}
+
+.action {
+	position: absolute;
+}
+
+.selectable {	
+  cursor: pointer !important;
+	visibility: visible;	
+	pointer-events: auto !important;
+}
+
+.action.selectable{
+	background-color: #ff000022;
+	border: solid 1px red;
+    border-radius: 53px;
+}
+
+.selectable:hover {
+    transform-origin: center;
+	transform:scale(1.1);
+}
+
+#actguildhall {
+	width: 188px;
+    height: 91px;
+    top: 41px;
+    left: 156px;
+}
+#actcathedral {
+	width: 188px;
+    height: 69px;
+    top: 21px;
+    left: 537px;
+}
+#actmines1 {
+width: 188px;
+    height: 44px;
+    top: 76px;
+    left: 981px;	
+}
+#actmines2 {
+	width: 188px;
+    height: 44px;
+    top: 139px;
+    left: 981px;	
+}
+
+#actguardhouse1 {
+    width: 196px;
+    height: 59px;
+    top: 118px;
+    left: 1391px;	
+}
+#actguardhouse2 {
+    width: 196px;
+    height: 59px;
+    top: 193px;
+    left: 1391px;	
+}
+#actguardhouse3 {
+width: 274px;
+    height: 76px;
+    top: 270px;
+    left: 1355px;
+}
+#actguardhouse4 {
+	width: 208px;
+    height: 76px;
+    top: 370px;
+    left: 1377px;
+}
+
+#actquarry {
+	width: 136px;
+    height: 44px;
+    top: 366px;
+    left: 1161px;
+}
+#actforest {
+    width: 136px;
+    height: 44px;
+    top: 592px;
+    left: 999px;
+}
+#actsilversmith {
+    width: 167px;
+    height: 44px;
+    top: 518px;
+    left: 738px;
+}
+#actstorehouse {
+width: 208px;
+    height: 106px;
+    top: 597px;
+    left: 438px;
+    border-radius: 28px;
+}
+#acttowncenter {
+width: 211px;
+    height: 81px;
+    top: 758px;
+    left: 738px;
+}
+#actworkshop1 {
+width: 200px;
+    height: 81px;
+    top: 999px;
+    left: 927px;
+}
+#actworkshop2 {
+width: 200px;
+    height: 53px;
+    top: 1099px;
+    left: 927px;
+}
+#acttaxstand {
+width: 145px;
+    height: 57px;
+    top: 770px;
+    left: 171px;
+}
+#actblackmarketa {
+    width: 131px;
+    height: 57px;
+    top: 970px;
+    left: 185px;
+}
+#actblackmarketb1 {
+width: 131px;
+    height: 57px;
+    top: 1073px;
+    left: 338px;
+}
+#actblackmarketb2 {
+width: 131px;
+    height: 57px;
+    top: 1153px;
+    left: 338px;
+}
+#actblackmarketc {
+    width: 131px;
+    height: 57px;
+    top: 970px;
+    left: 499px;
+}
+
+.score {
+	display: flex;
+	align-items:center;
+	justify-content:center;
+}
+
+.score .resnb {
+	margin-right : 5px;
+}
+
+.score4 {
+	margin-top:5px;
+}
+
+#page-title .arcicon, 
+.score .arcicon {
+	margin : 0px;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
+.reserve { visibility: hidden; width: 0px; height: 0px;}
+
+.apptype10 .apprentice_target,
+.apptype31 .apprentice_target,
+.apptype32 .apprentice_target,
+.apptype33 .apprentice_target,
+.apptype38 .apprentice_target
+ { left: -37px; }
+
+.lowerlane {
+	margin-top: 5px;
+	display: flex;
+	align-items:center;
+	justify-content: center;
+}
+
+.lowerlane .cards {
+	width: auto;
+	flex-wrap: nowrap;
+}
+
+.playertablename
+{	
+ 	font-family: "official";
+	font-weight: bold;	
+	font-size: 32px;
+	writing-mode: vertical-lr;
+	text-orientation: mixed;
+	width: 14px;
+    line-height: 19px;
+    transform-origin: center;
+    transform: rotate(180deg);
+    margin: 10px;
+    letter-spacing: 1px;
+}
+
+#logs .arcicon {
+	width: 14px;
+	height: 14px;
+	display: inline-block;
+	margin-left: 2px;
+	margin-right: 2px;
+	filter: none;
+	-webkit-filter: none;
+}
+
+.resmove {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+
+.hidden {
+	visibility: hidden; 
+}
+.hidden.lowerlaneselect {
+	height: 0px;
+}
+
+.bonus {
+    position: absolute;
+    top: 20px;
+    left: 0px;
+    width: 100%;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    gap: 10px;
+}
+
+.bonus .coin {
+    width: 30px;
+    height: 30px;	
+}
+
+.bonus .officialtext {
+    position: relative;
+    font-size: 40px;
+}
+.meeple.selectable {
+	filter: drop-shadow(1px 1px 17px red);
+	-webkit-filter: drop-shadow(1px 1px 17px red);	
+}
+
+.meeple.selectable:hover {
+    transform-origin: center;
+	transform:scale(1.5);
+}
+
+#rewardcpt {
+	justify-content: center;
+    align-items: center;
+    font-size: 40px;
+}
+
+.apptype13 .apprentice_name{
+	top: 256px;
+}
+
+.dijitTooltipContainer .apprentice,
+.dijitTooltipContainer .building {
+    pointer-events: none;	
+    position: relative;
+    margin: auto;
+}
+
+.anatooltip
+{
+ 	display: flex;
+  	align-items: center;
+	justify-content:center;	
+	flex-direction: column;
+	gap: 10px;
+}
+
+.score .arcicon.resmeeple {
+	width: 12.5px;
+}
+
+.remove2app {
+width: 35px;
+    height: 57px;
+    left: 216px;
+    top: 145px;
+	position: absolute;
+}
+
+#remove2app2 { top: 220px; }
+#remove2app3 { top: 295px; }
+
+.anattbuilding,
+.anattapprentice {
+    height: 410px;	
+    width: 250px;
+}
+
+.anatooltip .apprentice, 
+.anatooltip .building {
+	transform:scale(1.5);
+	transform-origin: top;
+}
+
+#score {
+	height : 1000px;
+	width : 800px;
+	font-family: "official";
+    background-image: url('img/scorepad.png');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    position : absolute;
+	top: 26px;
+    left: 544px;
+    border: solid 1px;
+    overflow: hidden;
+}
+
+#scoreinside2 {
+	height : 100%;
+	width : 100%;
+	font-family: "official";
+    position : absolute;
+    top: 153px;
+    left: 33px; 
+	transform: rotate(-8deg);
+	transform-origin: top left;
+}
+
+.anascore {
+	position: absolute;
+	font-size: 20px;
+	font-weight: bold;
+	width: 157px;
+    height: 64px;
+ 	display: flex;
+  	align-items: center;
+	justify-content:center;
+    font-size: 54px;
+}
+
+#zoom {
+	font-size: 40px;
+	position: absolute;
+	right : 0px;
+ 	color: white;
+ 	background-color: #ffffff88;
+ 	border : solid 1px white;
+ 	border-radius: 58px;
+    padding: 5px;
+}
+
+#zoom:hover {
+  cursor: pointer !important;
+    transform-origin: center;
+	transform:scale(1.2);
+}
+
+.meeplelocation .meeple {
+	width: 28px;
+	height: 47px;
+}
+
+.pboard .meeple {
+	width: 19px;
+	height: 31px;
+}
+
+.meepletype0 .meeplelocation .meeple0,
+.meepletype1 .meeplelocation .meeple1,
+.meepletype2 .meeplelocation .meeple2,
+.meepletype3 .meeplelocation .meeple3,
+.meepletype4 .meeplelocation .meeple4 {
+    width: 34px;
+	height: 56px;
+}
+
+
+.meepletype0 .pboard .meeple0,
+.meepletype1 .pboard .meeple1,
+.meepletype2 .pboard .meeple2,
+.meepletype3 .pboard .meeple3,
+.meepletype4 .pboard .meeple4 {
+    width: 23px;
+	height: 37px;
+}
+
+#closescore {
+	position: absolute;
+	top: 0px;
+	right: 0px;	
+	color: white;
+    background-color: #ffffff88;
+    border: solid 1px white;
+    border-radius: 58px;
+    padding: 5px;
+    padding-right: 7px;
+    padding-left: 7px;
+    font-size: 40px;
+}
+
+#closescore:hover {
+  cursor: pointer !important;
+    transform-origin: center;
+	transform:scale(1.2);
+}
+
+#score.mini {
+    height: 60px;
+    background-size: 100% 1666%;
+}
