@@ -312,7 +312,11 @@ class ArchitectsOfTheWestKingdom extends Table
         self::DbQuery($sql);
     }
 
-    function callPending($pending, $execute, $arg1 = null, $arg2 = null)
+    /**
+     * Call pending action
+     * @param $execute - false - just check if execution required, true - execute
+     */
+    function callPending($pending, bool $execute, $arg1 = null, $arg2 = null)
     {
         if (class_exists($pending['function'])) {
             $obj = new $pending['function']();
@@ -689,8 +693,6 @@ class ArchitectsOfTheWestKingdom extends Table
                     ));
                 }
             }
-            self::setGameStateValue('finish', 1);
-
             self::setGameStateValue('finish', 1);
             $this->gamestate->nextState('end');
         } else {
