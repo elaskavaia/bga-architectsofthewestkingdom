@@ -403,10 +403,18 @@ class ArchitectsOfTheWestKingdom extends Table
                     break;
                 case 'DEBT':
                     $type = DEBT;
+
                     break;
                 default:
                     throw new feException("Invalid resource type $typestr");
             }
+        }
+        switch ($type) {
+            case  DEBT;
+                $obj = new ARCPlayer($player_id);
+                $obj->pay("", "prison", $number * pow(10, $type), "prison");
+                return;
+                
         }
         $obj = new ARCPlayer($player_id);
         $obj->gainDirect($number, $type, "prison");

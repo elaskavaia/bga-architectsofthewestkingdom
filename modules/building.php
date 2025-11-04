@@ -12,6 +12,7 @@ class building extends APP_GameClass
     public $cost = 0;
     public $requirement = 0;
     public $virtue = 0;
+    public $player_id = 0;
         
     public function __construct()
     {
