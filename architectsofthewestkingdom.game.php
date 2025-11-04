@@ -78,6 +78,9 @@ class ArchitectsOfTheWestKingdom extends Table
         $this->blackmarkets->autoreshuffle = true;
 
         $this->notify->addDecorator(function (string $message, array $args) {
+            if (!isset($args['player_id'])) {
+                $args['player_id'] = $this->getActivePlayerId();
+            }
             if (isset($args['player_id']) && !isset($args['player_name']) && str_contains($message, '${player_name}')) {
                 $args['player_name'] = $this->getPlayerNameById($args['player_id']);
             }
@@ -414,7 +417,7 @@ class ArchitectsOfTheWestKingdom extends Table
                 $obj = new ARCPlayer($player_id);
                 $obj->pay("", "prison", $number * pow(10, $type), "prison");
                 return;
-                
+
         }
         $obj = new ARCPlayer($player_id);
         $obj->gainDirect($number, $type, "prison");
@@ -427,6 +430,10 @@ class ArchitectsOfTheWestKingdom extends Table
         for ($type = 1; $type <= 10; $type++) {
             $obj->gainDirect($number, $type, "prison");
         }
+    }
+
+    function debugLog(string $message, array $args= []) {
+        $this->notify->all("message", $message, $args);
     }
 
 

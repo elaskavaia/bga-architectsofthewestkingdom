@@ -1,7 +1,7 @@
 <?php
 
 
-class ARCPlayer 
+class ARCPlayer
 {
     public $player_id;
     public $player_no;
@@ -56,11 +56,15 @@ class ARCPlayer
         $ret['buttons'][] = 'Confirm';
         $ret['selectable']['Confirm'] = array();
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
         return $ret;
+    }
+
+    function isUndoAvailable() {
+        return ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0;
     }
 
     /**
@@ -432,7 +436,7 @@ class ARCPlayer
         $ret['buttons'][] = 'Skip';
         $ret['selectable']['Skip'] = array();
 
-        if (intval($parg1) > 0 && ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if (intval($parg1) > 0 && $this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -492,7 +496,7 @@ class ARCPlayer
         $ret['buttons'][] = 'Skip';
         $ret['selectable']['Skip'] = array();
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -783,7 +787,9 @@ class ARCPlayer
             }
         }
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        $ret['void'] = count($ret['selectable']) == 0;
+
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -1035,7 +1041,7 @@ class ARCPlayer
         $ret['buttons'][] = 'Skip';
         $ret['selectable']['Skip'] = array();
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -1222,7 +1228,7 @@ class ARCPlayer
             $ret['selectable']['Skip'] = array();
         }
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0 && $parg1 == "unique") {
+        if ($this->isUndoAvailable() && $parg1 == "unique") {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -1290,7 +1296,7 @@ class ARCPlayer
             foreach ($apprentices as $apprentice) {
                 $ret['selectable']["apprentice" . $apprentice['card_id']] = array();
             }
-            if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+            if ($this->isUndoAvailable()) {
                 $ret['buttons'][] = 'Undo';
                 $ret['selectable']['Undo'] = array();
             }
@@ -1401,7 +1407,7 @@ class ARCPlayer
         $ret['selectable']['Skip'] = array();
 
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -1452,7 +1458,7 @@ class ARCPlayer
             $ret['selectable']["building" . $building['card_id']] = array();
         }
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0 && $parg1 == "flush") {
+        if ($this->isUndoAvailable() && $parg1 == "flush") {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -1525,7 +1531,7 @@ class ARCPlayer
             $ret['buttons'][] = 'Skip';
             $ret['selectable']['Skip'] = array();
 
-            if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+            if ($this->isUndoAvailable()) {
                 $ret['buttons'][] = 'Undo';
                 $ret['selectable']['Undo'] = array();
             }
@@ -1678,7 +1684,7 @@ class ARCPlayer
             $ret['selectable']['res' . $cost] = array();
         }
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
@@ -2028,7 +2034,7 @@ class ARCPlayer
             $ret['buttons'][] = 'Pass';
             $ret['selectable']['Pass'] = array();
         }
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }

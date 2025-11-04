@@ -28,7 +28,7 @@ class building extends APP_GameClass
         return $obj;
     }
     
-    public function instant($player)
+    public function instant(ARCPlayer $player)
     {
         
     }
