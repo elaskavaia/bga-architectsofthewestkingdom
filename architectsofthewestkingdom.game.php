@@ -76,6 +76,13 @@ class ArchitectsOfTheWestKingdom extends Table
 
         $this->blackmarkets = $this->deckFactory->createDeck('blackmarket');
         $this->blackmarkets->autoreshuffle = true;
+
+        $this->notify->addDecorator(function (string $message, array $args) {
+            if (isset($args['player_id']) && !isset($args['player_name']) && str_contains($message, '${player_name}')) {
+                $args['player_name'] = $this->getPlayerNameById($args['player_id']);
+            }
+            return $args;
+        });
     }
 
     protected function getGameName()
@@ -398,16 +405,17 @@ class ArchitectsOfTheWestKingdom extends Table
             }
         }
         $obj = new ARCPlayer($player_id);
-        $obj->gainDirect($number, $type,"debug");
+        $obj->gainDirect($number, $type, "prison");
     }
 
-        function debug_gainResourceAll(int $number = 5) {
-            $player_id = $this->getCurrentPlayerId();
-            $obj = new ARCPlayer($player_id);
-            for($type = 1;$type<=10;$type++) {
-                $obj->gainDirect($number, $type,"debug");
-            }
+    function debug_gainResourceAll(int $number = 5)
+    {
+        $player_id = $this->getCurrentPlayerId();
+        $obj = new ARCPlayer($player_id);
+        for ($type = 1; $type <= 10; $type++) {
+            $obj->gainDirect($number, $type, "prison");
         }
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////
