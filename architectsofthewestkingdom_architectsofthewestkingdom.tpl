@@ -1,6 +1,9 @@
 {OVERALL_GAME_HEADER}
 
-
+<div id="hand_wrapper">
+  <!-- hand area has to be outside of zoom-wrapper to float properly -->
+</div>
+<div id="zoom-wrapper">
 <div id="gboard">
 	<div id="newRound" class="popit hidden" >Black Market Reset</div>
 	<div class="board" id="board">	
@@ -183,8 +186,20 @@
 			<a href="#player{PLAYER_AFTER}" id="down_{PLAYER_ID}"><i class="fa fa-chevron-down"></i></a>
 		</div>
 	</div>
+	<div id="hand_area" class="hand_area" data-open="1">
+	  <div id="hand_area_buttons">
+    <div id="button_hand_open" class="icon_hand hand_area_button">
+      <i class="fa fa-arrow-circle-o-down icon_down" aria-hidden="true"></i>
+      <i class="fa fa-arrow-circle-o-up icon_up" aria-hidden="true"></i>
+    </div>
+    <div id="button_hand_layout" class="icon_settle hand_area_button">
+      <i class="fa fa-hand-paper-o icon_float" aria-hidden="true"></i>
+      <i class="fa fa-window-maximize icon_park" aria-hidden="true"></i>
+    </div>
+  </div>
 	<div class="lowerlane" id="lowerlane{PLAYER_ID}">
         <div class="playertablename yourhand" style="color:#{PLAYER_COLOR}">
+
             YOUR HAND2
         </div>
 		<div class="cards" id="hand{PLAYER_ID}"></div>
@@ -195,11 +210,18 @@
         </div>
 		<div class="cards" id="selectCards{PLAYER_ID}"></div>
 	</div>
+	</div>
 </div>
 <!-- END player -->
 </div>
+
+<!-- END zoom-wrapper -->
+</div>
+
 <div id="arc-overall">
 </div>
+
+
 
 <script type="text/javascript">
 

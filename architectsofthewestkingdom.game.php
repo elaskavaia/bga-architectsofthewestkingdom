@@ -364,7 +364,7 @@ class ArchitectsOfTheWestKingdom extends Table
         $cards = $this->buildings->pickCardsForLocation(1, 'deck', 'hand' . $this->getCurrentPlayerId());
         foreach ($cards as $card_id => $card) {
             $building = self::getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
-            $this->notifyPlayer($this->getCurrentPlayerId(), "newbuilding", '', array(
+            $this->notify->player($this->getCurrentPlayerId(), "newbuilding", '', array(
                 'card' => $building
             ));
         }
