@@ -30,6 +30,17 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
         peradditional: _("Per additional"),
       };
 
+      this.skills = {
+        0: _("No skills"),
+        1: _("Carpentry"),
+        2: _("Tiling"),
+        3: _("Carpentry and Tiling"),
+        4: _("Masonry"),
+        5: _("Carpentry and Masonry"),
+        6: _("Tiling and Masonry"),
+        7: _("All three skills"),
+      };
+
       this.tooltips = {
         actmines1: _("Gain 1 Clay per Worker, plus 1 additional Clay for each Worker"),
         actmines2: _("Gain 1 Gold for every 2 Workers"),
@@ -46,7 +57,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           "When choosing this action, the current player gains Building Cards from the top of the Building Card Pile. The number of Building Cards they gain is always 1, plus 1 additional card for every 2 Workers they have at the Workshop."
         ),
         acttowncenter: _(
-          "The Town Centre allows players to recruit locals to capture Workers from any of the “large open circle” locations on the Main Board. For each Worker a player has at the Town Centre, they may spend 1 Silver to capture 1 group of Workers (of a single colour) from 1 location (up to 2 locations for 2-3 player game)"
+          "The Town Centre allows players to recruit locals to capture Workers from any of the 'large open circle' locations on the Main Board. For each Worker a player has at the Town Centre, they may spend 1 Silver to capture 1 group of Workers (of a single colour) from 1 location (up to 2 locations for 2-3 player game)"
         ),
         acttaxstand: _(
           "This location allows players to take all the Silver from above the Tax Stand and place it into their own supply. However, this will cause them to lose 2 Virtue. Players are not allowed to place a Worker here if there is no Tax to steal."
@@ -60,7 +71,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
         actguardhouse1: _("Send all captured Workers from their Player Board to the Prison, gaining 1 Silver for each"),
         actguardhouse2: _("Release all their own Workers from Prison, placing them back onto their Player Board"),
         actguardhouse3: _(
-          "Pay 5 Silver (2 Tax), or take 1 Debt and lose 1 Virtue to release all their own Workers from other players’ Boards, placing them back onto their Player Board."
+          "Pay 5 Silver (2 Tax), or take 1 Debt and lose 1 Virtue to release all their own Workers from other players' Boards, placing them back onto their Player Board."
         ),
         actguardhouse4: _("Pay 6 Silver (3 Tax) to pay off 1 Debt."),
         actguildhall: _(
@@ -83,221 +94,259 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           name: _("Acolyte"),
           target: _(""),
           tooltip: _("When advancing work on the Cathedral, also gain the reward shown on the right."),
+          skill: 1,
         },
         2: {
           name: _("Acolyte"),
           target: _(""),
           tooltip: _("When advancing work on the Cathedral, also gain the reward shown on the right."),
+          skill: 2,
         },
         3: {
           name: _("Acolyte"),
           target: _(""),
           tooltip: _("When advancing work on the Cathedral, also gain the reward shown on the right."),
+          skill: 1,
         },
         4: {
           name: _("Conspirator"),
           target: _("TOWN CENTRE"),
           tooltip: _("Spend 1 less Silver (not Tax) than required when making captures at the Town Centre."),
+          skill: 1,
         },
         5: {
           name: _("Conspirator"),
           target: _("TOWN CENTRE"),
           tooltip: _("Spend 1 less Silver (not Tax) than required when making captures at the Town Centre."),
+          skill: 1,
         },
         6: {
           name: _("Debt Collector"),
           target: _(""),
           tooltip: _("When paying off a Debt, also gain the additional resources shown on the right."),
+          skill: 2,
         },
         7: {
           name: _("Debt Collector"),
           target: _(""),
           tooltip: _("When paying off a Debt, also gain the additional resources shown on the right."),
+          skill: 4,
         },
         8: {
           name: _("Debt Collector"),
           target: _(""),
           tooltip: _("When paying off a Debt, also gain the additional resources shown on the right."),
+          skill: 1,
         },
         9: {
           name: _("Gatekeeper"),
           target: _(""),
           tooltip: _("This player may release 2 of their Workers from Prison everytime there is a Black Market Reset."),
+          skill: 4,
         },
         10: {
           name: _("Illusionist"),
           target: _("BLACK MARKET"),
           tooltip: _("Do not lose Virtue when taking actions at the Black Market."),
+          skill: 1,
         },
         11: {
           name: _("Jeweller"),
           target: _("SILVERSMITH"),
           tooltip: _("When taking an action to collect Silver at the Silversmith, also gain 1 additional Silver."),
+          skill: 2,
         },
         12: {
           name: _("Jeweller"),
           target: _("SILVERSMITH"),
           tooltip: _("When taking an action to collect Silver at the Silversmith, also gain 1 additional Silver."),
+          skill: 2,
         },
-        13: { name: _("Labourer"), target: _(""), tooltip: _("This Apprentice has all 3 skill types.") },
+        13: { name: _("Labourer"), target: _(""), tooltip: _("This Apprentice has all 3 skill types."), skill: 7 },
         14: {
           name: _("Merchant"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
+            "As an action at the King's Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
           ),
+          skill: 2,
         },
         15: {
           name: _("Merchant"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
+            "As an action at the King's Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
           ),
+          skill: 4,
         },
         16: {
           name: _("Merchant"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
+            "As an action at the King's Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
           ),
+          skill: 2,
         },
         17: {
           name: _("Merchant"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
+            "As an action at the King's Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
           ),
+          skill: 4,
         },
         18: {
           name: _("Merchant"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
+            "As an action at the King's Storehouse, players may spend the Silver on the left to gain the resources shown on the right."
           ),
+          skill: 1,
         },
         19: {
           name: _("Miner"),
           target: _("MINES"),
           tooltip: _("When taking an action to collect either Clay or Gold at the Mines, also gain 1 additional Clay."),
+          skill: 2,
         },
         20: {
           name: _("Miner"),
           target: _("MINES"),
           tooltip: _("When taking an action to collect either Clay or Gold at the Mines, also gain 1 additional Clay."),
+          skill: 2,
         },
         21: {
           name: _("Patron"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
           ),
+          skill: 2,
         },
         22: {
           name: _("Patron"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
           ),
+          skill: 4,
         },
         23: {
           name: _("Patron"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
           ),
+          skill: 4,
         },
         24: {
           name: _("Patron"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain the Virtue shown on the right."
           ),
+          skill: 1,
         },
-        25: { name: _("Pickpocket"), target: _("TAX STAND"), tooltip: _("Gain 1 Gold when stealing from the Tax Stand.") },
+        25: { name: _("Pickpocket"), target: _("TAX STAND"), tooltip: _("Gain 1 Gold when stealing from the Tax Stand."), skill: 2 },
         26: {
           name: _("Squire"),
           target: _(""),
           tooltip: _("They gain the reward shown on the right, if they have no Workers in Prison during each Black Market Reset."),
+          skill: 2,
         },
         27: {
           name: _("Squire"),
           target: _(""),
           tooltip: _("They gain the reward shown on the right, if they have no Workers in Prison during each Black Market Reset."),
+          skill: 4,
         },
         28: {
           name: _("Squire"),
           target: _(""),
           tooltip: _("They gain the reward shown on the right, if they have no Workers in Prison during each Black Market Reset."),
+          skill: 1,
         },
         29: {
           name: _("Stonecutter"),
           target: _("QUARRY"),
           tooltip: _("When taking an action to collect Stone at the Quarry, also gain 1 additional Stone."),
+          skill: 4,
         },
         30: {
           name: _("Stonecutter"),
           target: _("QUARRY"),
           tooltip: _("When taking an action to collect Stone at the Quarry, also gain 1 additional Stone."),
+          skill: 4,
         },
         31: {
           name: _("Swindler"),
           target: _("BLACK MARKET"),
           tooltip: _("When taking an action at the Black Market, also gain the additional resources shown."),
+          skill: 2,
         },
         32: {
           name: _("Swindler"),
           target: _("BLACK MARKET"),
           tooltip: _("When taking an action at the Black Market, also gain the additional resources shown."),
+          skill: 4,
         },
         33: {
           name: _("Swindler"),
           target: _("BLACK MARKET"),
           tooltip: _("When taking an action at the Black Market, also gain the additional resources shown."),
+          skill: 1,
         },
-        34: { name: _("Thief"), target: _("TAX STAND"), tooltip: _("Lose 1 less Virtue when stealing from the Tax Stand.") },
+        34: { name: _("Thief"), target: _("TAX STAND"), tooltip: _("Lose 1 less Virtue when stealing from the Tax Stand."), skill: 1 },
         35: {
           name: _("Trader"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain those shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain those shown on the right."
           ),
+          skill: 2,
         },
         36: {
           name: _("Trader"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain those shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain those shown on the right."
           ),
+          skill: 4,
         },
         37: {
           name: _("Trader"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _(
-            "As an action at the King’s Storehouse, players may spend the resources on the left to gain those shown on the right."
+            "As an action at the King's Storehouse, players may spend the resources on the left to gain those shown on the right."
           ),
+          skill: 1,
         },
         38: {
           name: _("Trickster"),
           target: _("BLACK MARKET"),
           tooltip: _("Pay 1 less Silver than required when taking actions at the Black Market."),
+          skill: 4,
         },
         39: {
           name: _("Woodcutter"),
           target: _("FOREST"),
           tooltip: _("When taking an action to collect Wood at the Forest, also gain 1 additional Wood."),
+          skill: 1,
         },
         40: {
           name: _("Woodcutter"),
           target: _("FOREST"),
           tooltip: _("When taking an action to collect Wood at the Forest, also gain 1 additional Wood."),
+          skill: 1,
         },
-        41: { name: _("Enforcer"), target: _(""), tooltip: _("Gain 1 Gold when sending all captured Workers to Prison.") },
+        41: { name: _("Enforcer"), target: _(""), tooltip: _("Gain 1 Gold when sending all captured Workers to Prison."), skill: 2 },
         42: {
           name: _("Overseer"),
           target: _("KING'S STOREHOUSE"),
           tooltip: _("Always treat the King's Storehouse as if you had 1 additional Worker there."),
+          skill: 4,
         },
-        43: { name: _("Peddler"), target: _(""), tooltip: _("Gain 2 Silver on each Black Market Reset.") },
+        43: { name: _("Peddler"), target: _(""), tooltip: _("Gain 2 Silver on each Black Market Reset."), skill: 1 },
       };
 
       this.buildings = {
@@ -306,40 +355,46 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 0,
         },
         2: {
           name: _("Steeple"),
           most: true,
           per: false,
           tooltip: _(
-            "If the controlling player has advanced work on the Cathedral more than any other player (ties don’t count), they gain the reward shown on the right."
+            "If the controlling player has advanced work on the Cathedral more than any other player (ties don't count), they gain the reward shown on the right."
           ),
+          requirement: 0,
         },
         3: {
           name: _("Stone Market"),
           most: true,
           per: false,
           tooltip: _(
-            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don’t count)."
+            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
+          requirement: 4,
         },
         4: {
           name: _("Tavern"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately hires any 1 faceup Apprentice for free."),
+          requirement: 1,
         },
         5: {
           name: _("Thieves' Den"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 4,
         },
         6: {
           name: _("Tiler's Hut"),
           most: false,
           per: true,
           tooltip: _("The controlling player scores 1 additional VP for each hired Apprentice they have with the indicated skill."),
+          requirement: 0,
         },
         7: {
           name: _("Trading Post"),
@@ -348,44 +403,51 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
+          requirement: 4,
         },
         8: {
           name: _("Treasury"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 2,
         },
         9: {
           name: _("University"),
           most: false,
           per: false,
           tooltip: _("The controlling player gains 2 additional VP if they have no unpaid Debts."),
+          requirement: 7,
         },
         10: {
           name: _("Watchtower"),
           most: false,
           per: false,
           tooltip: _("All players with 3 or more Workers in Prison immediately lose 1 Virtue (including the controlling player)."),
+          requirement: 7,
         },
         11: {
           name: _("Well"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 0,
         },
         12: {
           name: _("Wood Market"),
           most: true,
           per: false,
           tooltip: _(
-            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don’t count)."
+            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
+          requirement: 1,
         },
         13: {
           name: _("Aqueduct"),
           most: false,
           per: true,
           tooltip: _("The controlling player gains 1 VP for every constructed Buildings."),
+          requirement: 0,
         },
         14: {
           name: _("Armoury"),
@@ -394,6 +456,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
+          requirement: 5,
         },
         15: {
           name: _("Barracks"),
@@ -402,18 +465,21 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
+          requirement: 7,
         },
         16: {
           name: _("Betting House"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 0,
         },
         17: {
           name: _("Carpenter's Hut"),
           most: false,
           per: true,
           tooltip: _("The controlling player scores 1 additional VP for each hired Apprentice they have with the indicated skill."),
+          requirement: 0,
         },
         18: {
           name: _("Castle"),
@@ -422,47 +488,54 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
+          requirement: 7,
         },
         19: {
           name: _("Chapel"),
           most: true,
           per: false,
           tooltip: _(
-            "If the controlling player has advanced work on the Cathedral more than any other player (ties don’t count), they gain the reward shown on the right."
+            "If the controlling player has advanced work on the Cathedral more than any other player (ties don't count), they gain the reward shown on the right."
           ),
+          requirement: 1,
         },
         20: {
           name: _("Church"),
           most: false,
           per: false,
           tooltip: _("The controlling player may immediately destroy 1 unpaid Debt they hold."),
+          requirement: 0,
         },
         21: {
           name: _("Clay Market"),
           most: true,
           per: false,
           tooltip: _(
-            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don’t count)."
+            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
+          requirement: 2,
         },
         22: {
           name: _("Clay Pit"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 0,
         },
         23: {
           name: _("Drafting Room"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 3,
         },
-        24: { name: _("Dungeon"), most: false, per: false, tooltip: _("The controlling player loses 2 Virtue") },
+        24: { name: _("Dungeon"), most: false, per: false, tooltip: _("The controlling player loses 2 Virtue"), requirement: 7 },
         25: {
           name: _("Factory"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 4,
         },
         26: {
           name: _("Fortress"),
@@ -471,13 +544,21 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
+          requirement: 7,
         },
-        27: { name: _("Fountain"), most: false, per: false, tooltip: _("The controlling player loses 1 less VP for each unpaid Debt.") },
+        27: {
+          name: _("Fountain"),
+          most: false,
+          per: false,
+          tooltip: _("The controlling player loses 1 less VP for each unpaid Debt."),
+          requirement: 0,
+        },
         28: {
           name: _("Gambler's Den"),
           most: false,
           per: false,
           tooltip: _("The controlling player loses 1 additional VP for each unpaid Debt (3 total per unpaid Debt)."),
+          requirement: 3,
         },
         29: {
           name: _("Hideout"),
@@ -486,33 +567,56 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
+          requirement: 5,
         },
-        30: { name: _("Keep"), most: false, per: true, tooltip: _("The controlling player gains 1 VP for every 3 Captured Workers.") },
+        30: {
+          name: _("Keep"),
+          most: false,
+          per: true,
+          tooltip: _("The controlling player gains 1 VP for every 3 Captured Workers."),
+          requirement: 7,
+        },
         31: {
           name: _("Library"),
           most: false,
           per: false,
           tooltip: _("The controlling player may immediately discard 1 chosen Building Card from their hand to gain 2 Gold."),
+          requirement: 3,
         },
-        32: { name: _("Lighthouse"), most: false, per: true, tooltip: _("The controlling player gains 1 VP for every 4 Virtues.") },
+        32: {
+          name: _("Lighthouse"),
+          most: false,
+          per: true,
+          tooltip: _("The controlling player gains 1 VP for every 4 Virtues."),
+          requirement: 2,
+        },
         33: {
           name: _("Lumber Camp"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
+          requirement: 0,
         },
         34: {
           name: _("Mason's Hut"),
           most: false,
           per: true,
           tooltip: _("The controlling player scores 1 additional VP for each hired Apprentice they have with the indicated skill."),
+          requirement: 0,
         },
-        35: { name: _("Moneylender"), most: false, per: true, tooltip: _("The controlling player gains 1 VP for every 1 paid Debts.") },
+        35: {
+          name: _("Moneylender"),
+          most: false,
+          per: true,
+          tooltip: _("The controlling player gains 1 VP for every 1 paid Debts."),
+          requirement: 4,
+        },
         36: {
           name: _("Monument"),
           most: false,
           per: false,
           tooltip: _("All players immediately gain 1 Virtue. (Note that the controlling player will gain a total of 2 Virtue)."),
+          requirement: 6,
         },
         37: {
           name: _("Observatory"),
@@ -521,12 +625,14 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
+          requirement: 1,
         },
         38: {
           name: _("Palace"),
           most: false,
           per: true,
           tooltip: _("The controlling player immediately gains 1 Gold for every 4 Virtue they currently have."),
+          requirement: 6,
         },
         39: {
           name: _("Reservoir"),
@@ -535,14 +641,16 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
+          requirement: 0,
         },
         40: {
           name: _("Silver Market"),
           most: true,
           per: false,
           tooltip: _(
-            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don’t count)."
+            "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
+          requirement: 2,
         },
         41: {
           name: _("Crane"),
@@ -551,13 +659,21 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           tooltip: _(
             "Immediately place another Worker in the Guildhall to either construct another Building or advance work on the Cathedral."
           ),
+          requirement: 0,
         },
-        42: { name: _("Graveyard"), most: false, per: false, tooltip: _("Immediately discard 1 of your hired Apprentices.") },
+        42: {
+          name: _("Graveyard"),
+          most: false,
+          per: false,
+          tooltip: _("Immediately discard 1 of your hired Apprentices."),
+          requirement: 7,
+        },
         43: {
           name: _("Museum"),
           most: false,
           per: true,
           tooltip: _("Gain 1 Virtue at the end of the game for every 2 Buildings you have constructed."),
+          requirement: 0,
         },
       };
 

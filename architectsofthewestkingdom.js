@@ -652,14 +652,19 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       dojo.place(this.format_block("jstpl_building", card), $(card.card_location));
       dojo.query("#building" + card["card_id"]).connect("onclick", this, "onSelect");
 
-      var html =
-        '<div class="anatooltip"><div class="anattbuilding">' +
-        this.format_block("jstpl_building", card) +
-        '</div><div class="ttbuilding"><b>' +
-        _(this.helper.buildings[card["card_type"]]["name"]) +
-        " :</b><br/><div>" +
-        _(this.helper.buildings[card["card_type"]]["tooltip"]) +
-        "</div></div></div>";
+      const helpnode = this.helper.buildings[card["card_type"]];
+      const name = _(helpnode.name);
+      const tooltip = _(helpnode.tooltip);
+      const skill = _(this.helper.skills[helpnode.requirement]);
+
+      var html = `<div class="anatooltip">
+		  <div class="anattbuilding ttleft">${this.format_block("jstpl_building", card)}</div>
+		  <div class="ttbuilding ttright">
+		    <b>${name}</b><br/>
+		    <p><b>${_("Ability")}</b>: ${tooltip}</p>
+			<p><b>${_("Skills Requirement")}</b>: ${skill}</p>
+		  </div>
+		</div>`;
       this.addTooltipHtml("building" + card["card_id"], html, 1000);
     },
 
@@ -675,14 +680,23 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
         dojo.query("#silverbonushead" + card["card_id"]).removeClass("hidden");
       }
 
-      var html =
-        '<div class="anatooltip"><div class="anattbuilding">' +
-        this.format_block("jstpl_apprentice", card) +
-        '</div><div class="ttbuilding"><b>' +
-        _(this.helper.apprentices[card["card_type"]]["name"]) +
-        " :</b><br/><div>" +
-        _(this.helper.apprentices[card["card_type"]]["tooltip"]) +
-        "</div></div></div>";
+      const helpnode = this.helper.apprentices[card["card_type"]];
+      const name = _(helpnode.name);
+      const tooltip = _(helpnode.tooltip);
+      const skill = _(this.helper.skills[helpnode.skill]);
+      let location = "";
+      if (helpnode.target) {
+        location = `<p><b>${_("Location")}</b>: ${_(helpnode.target)}</p>`;
+      }
+      var html = `<div class="anatooltip">
+		  <div class="anattbuilding ttleft">${this.format_block("jstpl_apprentice", card)}</div>
+		  <div class="ttbuilding ttright">
+		    <b>${name}</b><br/>
+		    <p><b>${_("Ability")}</b>: ${tooltip}</p>
+			<p><b>${_("Skill")}</b>: ${skill}</p>
+			${location}
+		  </div>
+		</div>`;
       this.addTooltipHtml("apprentice" + card["card_id"], html, 1000);
     },
 

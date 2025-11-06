@@ -417,7 +417,9 @@ class ARCPlayer
         $ret['titleyou'] = clienttranslate('${you} may use additional guardhouse actions (#nb# left)');
         $ret['nb'] = $parg1;
 
-        if (intval($parg1) > 0) {
+        $number = (int) $parg1;
+
+        if ($number > 0) {
             if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$this->player_id}'") > 0) {
                 $ret['selectable']["actguardhouse1"] = array();
             }
@@ -437,7 +439,7 @@ class ARCPlayer
         $ret['buttons'][] = 'Skip';
         $ret['selectable']['Skip'] = array();
 
-        if (intval($parg1) > 0 && $this->isUndoAvailable()) {
+        if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
         }
