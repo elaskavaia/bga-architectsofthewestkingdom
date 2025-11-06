@@ -5,7 +5,7 @@ for($i = 1; $i<=43;$i++)
     include("building/building{$i}.php");    
 }
 
-class building extends APP_GameClass
+class building 
 {
     public $type = 0;
     public $vp = 0;

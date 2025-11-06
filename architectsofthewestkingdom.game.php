@@ -25,9 +25,9 @@ include('modules/building.php');
 include('modules/apprentice.php');
 
 
-class ArchitectsOfTheWestKingdom extends Table
+class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
 {
-    public static $instance = null;
+    public static ArchitectsOfTheWestKingdom $instance;
     public \Bga\GameFramework\Components\Deck $buildings;
     public \Bga\GameFramework\Components\Deck $apprentices;
     public \Bga\GameFramework\Components\Deck $rewards;
@@ -53,8 +53,9 @@ class ArchitectsOfTheWestKingdom extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
+        self::$instance = $this;
 
-        self::initGameStateLabels(array(
+        $this->initGameStateLabels(array(
             "tax" => 10,
             "no_undo" => 11,
             "finish" => 12,
@@ -64,7 +65,7 @@ class ArchitectsOfTheWestKingdom extends Table
             "live_scoring" => 101,
         ));
 
-        self::$instance = $this;
+
 
         $this->apprentices = $this->deckFactory->createDeck('apprentice');
         $this->apprentices->autoreshuffle = true;
@@ -106,7 +107,7 @@ class ArchitectsOfTheWestKingdom extends Table
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $gameinfos = self::getGameinfos();
+        $gameinfos = $this->getGameinfos();
         $default_colors = $gameinfos['player_colors'];
 
         // Create players
@@ -119,7 +120,7 @@ class ArchitectsOfTheWestKingdom extends Table
         shuffle($indexrand);
 
         foreach ($players as $player_id => $player) {
-            if (self::getGameStateValue('board_side') == 1) {
+            if ($this->getGameStateValue('board_side') == 1) {
                 $type = $this->standardBox[$index - 1] + 10;
                 $color = $this->player_colors[$index];
             } else {
@@ -136,29 +137,29 @@ class ArchitectsOfTheWestKingdom extends Table
             $values[] = "('" . $player_id . "','$color','" . $player['player_canal'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "', {$type})";
         }
         $sql .= implode(',', $values);
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
 
-        if (self::getGameStateValue('board_side') == 1) {
-            self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
-            self::reloadPlayersBasicInfos();
+        if ($this->getGameStateValue('board_side') == 1) {
+            $this->reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
+            $this->reloadPlayersBasicInfos();
 
-            $players = self::getCollectionFromDb("select * from player order by player_no desc");
+            $players = $this->getCollectionFromDb("select * from player order by player_no desc");
             foreach ($players as $player_id => $player) {
                 $color = $player['player_color'];
                 $type = 10 + $this->standardBox[array_search($color, $this->player_colors) - 1];
-                self::DbQuery("update player set type = {$type} where player_id = {$player['player_id']}");
+                $this->DbQuery("update player set type = {$type} where player_id = {$player['player_id']}");
             }
         } else {
 
-            self::reloadPlayersBasicInfos();
+            $this->reloadPlayersBasicInfos();
         }
 
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue('tax', 4);
-        self::setGameStateInitialValue('no_undo', 0);
-        self::setGameStateInitialValue('finish', 0);
+        $this->setGameStateInitialValue('tax', 4);
+        $this->setGameStateInitialValue('no_undo', 0);
+        $this->setGameStateInitialValue('finish', 0);
 
         // Init game statistics
         $this->initStat('player', 'turns_number', 0);
@@ -189,33 +190,33 @@ class ArchitectsOfTheWestKingdom extends Table
     {
         $result = array();
 
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
+        $current_player_id = $this->getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player.player_id id, player_no, player_score score, player_color color,type, res1, res2, res3, res4, res5, res6, 0 res7, res8, cathedral, virtue FROM player left join (select count(*) res8, player_id from worker where location like 'reserve%' group by player_id) as R on R.player_id = player.player_id";
-        $result['players'] = self::getCollectionFromDb($sql);
+        $result['players'] = $this->getCollectionFromDb($sql);
         foreach ($result['players'] as $player_id => $player) {
-            $result['players'][$player_id]['res7']  = self::getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$player_id}'");
-            $result['players'][$player_id]['res12']  = self::getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$player_id}'");
-            $result['players'][$player_id]['res13']  = self::getUniqueValueFromDB("select count(*) from debt where player_id = {$player_id} and paid = 0");
-            $result['players'][$player_id]['res14']  = self::getUniqueValueFromDB("select count(*) from debt where player_id = {$player_id} and paid = 1");
+            $result['players'][$player_id]['res7']  = $this->getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$player_id}'");
+            $result['players'][$player_id]['res12']  = $this->getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$player_id}'");
+            $result['players'][$player_id]['res13']  = $this->getUniqueValueFromDB("select count(*) from debt where player_id = {$player_id} and paid = 0");
+            $result['players'][$player_id]['res14']  = $this->getUniqueValueFromDB("select count(*) from debt where player_id = {$player_id} and paid = 1");
         }
 
-        $result['side'] = self::getGameStateValue('board_side') == SIDEA ? 'A' : 'B';
-        $result['tax'] = self::getGameStateValue('tax');
+        $result['side'] = $this->getGameStateValue('board_side') == SIDEA ? 'A' : 'B';
+        $result['tax'] = $this->getGameStateValue('tax');
 
         $sql = "SELECT worker.*, player_color FROM `worker` inner join player on player.player_id = worker.player_id WHERE 1 order by location_arg, id";
-        $result['workers'] = self::getObjectListFromDB($sql);
+        $result['workers'] = $this->getObjectListFromDB($sql);
 
         $sql = "SELECT * from apprentice where card_location <> 'deck'";
-        $result['apprentices'] = self::getCollectionFromDb($sql);
+        $result['apprentices'] = $this->getCollectionFromDb($sql);
 
         $sql = "SELECT * from building where card_location <> 'deck' and card_location not like 'hand%' and card_location not like 'selectCards%'";
-        $result['buildings'] = self::getCollectionFromDb($sql);
+        $result['buildings'] = $this->getCollectionFromDb($sql);
 
         $sql = "SELECT * from building where card_location = 'hand{$current_player_id}'";
-        $result['hand'] = self::getCollectionFromDb($sql);
+        $result['hand'] = $this->getCollectionFromDb($sql);
 
         $result['rewardnb'] = $this->rewards->countCardInLocation("deck");
         $result['blackmarket1'] = $this->blackmarkets->getCardOnTop("deck");
@@ -223,8 +224,8 @@ class ArchitectsOfTheWestKingdom extends Table
 
         $score = array();
 
-        if (self::getGameStateValue('finish') == 1) {
-            $players = self::getCollectionFromDb("select * from player order by player_no desc");
+        if ($this->getGameStateValue('finish') == 1) {
+            $players = $this->getCollectionFromDb("select * from player order by player_no desc");
             foreach ($players as $player_id => $player) { {
                     $p = new ARCPlayer($player['player_id']);
                     $score[] = $p->updateVP(true);
@@ -249,8 +250,8 @@ class ArchitectsOfTheWestKingdom extends Table
     function getGameProgression()
     {
 
-        $nbplayers = max(2, self::getUniqueValueFromDB("select count(*) from player"));
-        $nbmeeplesOnLocation = self::getUniqueValueFromDB("select count(*)  from worker where location = 'guildhall'");
+        $nbplayers = max(2, $this->getUniqueValueFromDB("select count(*) from player"));
+        $nbmeeplesOnLocation = $this->getUniqueValueFromDB("select count(*)  from worker where location = 'guildhall'");
         $nbmax = ($nbplayers + 1) * 4;
         return min(100, (100 * $nbmeeplesOnLocation) / $nbmax);
     }
@@ -262,7 +263,7 @@ class ArchitectsOfTheWestKingdom extends Table
 
     function checkArgs($arg1, $arg2)
     {
-        $ret = self::argPlayerTurn();
+        $ret = $this->argPlayerTurn();
 
         if (!in_array($arg1, array_keys($ret['selectable'])) && !in_array($arg1, $ret['buttons'])) {
             throw new feException("Not a valid move");
@@ -275,10 +276,10 @@ class ArchitectsOfTheWestKingdom extends Table
     {
         $result = array();
 
-        $players = self::loadPlayersBasicInfos();
-        $nextPlayer = self::createNextPlayerTable(array_keys($players));
+        $players = $this->loadPlayersBasicInfos();
+        $nextPlayer = $this->createNextPlayerTable(array_keys($players));
 
-        $current_player = self::getCurrentPlayerId();
+        $current_player = $this->getCurrentPlayerId();
 
         if (!isset($nextPlayer[$current_player])) {
             // Spectator mode: take any player for south
@@ -299,20 +300,20 @@ class ArchitectsOfTheWestKingdom extends Table
     function addPendingSub($player_id, $function, $sub, $arg = NULL, $arg2 = NULL, $arg3 = NULL)
     {
         $sql = "INSERT INTO pending (player_id, function, sub, arg, arg2, arg3) VALUES (" . $player_id . ", '" . $function . "', '" . $sub . "', '" . $arg . "', '" . $arg2 . "', '" . $arg3 . "')";
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
     }
 
     function addPending($player_id, $function, $arg = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL)
     {
         $sql = "INSERT INTO pending (player_id, function, arg, arg2, arg3, arg4) VALUES (" . $player_id . ", '" . $function . "', '" . $arg . "', '" . $arg2 . "', '" . $arg3 . "', '" . $arg4 . "')";
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
     }
 
     function addPendingFirst($player_id, $function, $arg = NULL, $arg2 = NULL)
     {
-        $minid = self::getUniqueValueFromDB("select min(id) from pending") - 1;
+        $minid = $this->getUniqueValueFromDB("select min(id) from pending") - 1;
         $sql = "INSERT INTO pending (id, player_id, function, arg, arg2) VALUES (" . $minid . "," . $player_id . ", '" . $function . "', '" . $arg . "', '" . $arg2 . "')";
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
     }
 
     /**
@@ -363,13 +364,32 @@ class ArchitectsOfTheWestKingdom extends Table
         $this->buildings->insertCardOnExtremePosition(array_values($cards)[0]["id"], "deck", true);
         $cards = $this->buildings->pickCardsForLocation(1, 'deck', 'hand' . $this->getCurrentPlayerId());
         foreach ($cards as $card_id => $card) {
-            $building = self::getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
+            $building = $this->getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
             $this->notify->player($this->getCurrentPlayerId(), "newbuilding", '', array(
                 'card' => $building
             ));
         }
     }
 
+    function debug_drawApprentice(int $number)
+    {
+        $cards = $this->apprentices->getCardsOfType($number);
+        if (count($cards) == 0) throw new feException("Apprentice not found $number");
+        $this->apprentices->insertCardOnExtremePosition(array_values($cards)[0]["id"], "deck", true);
+        $cards = $this->apprentices->pickCardsForLocation(1, 'deck', 'cards' . $this->getCurrentPlayerId());
+        foreach ($cards as $card_id => $card) {
+            $apprentice = $this->getObjectFromDB("SELECT * FROM apprentice WHERE card_id = {$card['id']}");
+            $this->notify->player($this->getCurrentPlayerId(), "newapprentice", '', array(
+                'card' => $apprentice
+            ));
+        }
+    }
+
+    function debug_replaceCharacter(int $number)
+    {
+        $player_id = $this->getCurrentPlayerId();
+        $this->DbQuery("update player set type = {$number} where player_id = {$player_id}");
+    }
     function debug_gainResource(string $typestr, int $number = 5)
     {
         $player_id = $this->getCurrentPlayerId();
@@ -417,7 +437,6 @@ class ArchitectsOfTheWestKingdom extends Table
                 $obj = new ARCPlayer($player_id);
                 $obj->pay("", "prison", $number * pow(10, $type), "prison");
                 return;
-
         }
         $obj = new ARCPlayer($player_id);
         $obj->gainDirect($number, $type, "prison");
@@ -432,7 +451,8 @@ class ArchitectsOfTheWestKingdom extends Table
         }
     }
 
-    function debugLog(string $message, array $args= []) {
+    function debugLog(string $message, array $args = [])
+    {
         $this->notify->all("message", $message, $args);
     }
 
@@ -443,33 +463,33 @@ class ArchitectsOfTheWestKingdom extends Table
 
     function actSelect($arg1, $arg2)
     {
-        self::checkAction('select');
+        $this->checkAction('select');
 
-        if ($this->gamestate->state()['name'] == "playerDraft") {
+        if ($this->gamestate->getCurrentMainState()['name'] == "playerDraft") {
             $player_id = $this->getCurrentPlayerId();
             $p = new ARCPlayer($player_id);
             $p->selectBuilding(null, null, $arg1, $arg2);
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                 'id' => "res_" . $player_id . "_7",
-                'nb' => self::getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$player_id}'")
+                'nb' => $this->getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$player_id}'")
             ));
 
             $this->giveExtraTime($this->getCurrentPlayerId());
             $this->gamestate->setPlayerNonMultiactive($this->getCurrentPlayerId(), 'next');
         } else {
-            self::checkArgs($arg1, $arg2);
+            $this->checkArgs($arg1, $arg2);
             if ($arg1 == "Undo") {
                 $this->undoRestorePoint();
                 $this->gamestate->nextState('next');
                 return;
             }
 
-            $pending =  self::getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+            $pending =  $this->getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
             $this->callPending($pending, true, $arg1, $arg2);
-            self::DbQuery("delete from pending where id=" . $pending['id']);
+            $this->DbQuery("delete from pending where id=" . $pending['id']);
 
-            $this->giveExtraTime(self::getActivePlayerId());
+            $this->giveExtraTime($this->getActivePlayerId());
             $this->gamestate->nextState('next');
         }
     }
@@ -481,7 +501,7 @@ class ArchitectsOfTheWestKingdom extends Table
 
     function argPlayerTurn()
     {
-        $pending =  self::getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+        $pending =  $this->getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
         $arg = $this->callPending($pending, false);
 
         return $arg;
@@ -493,7 +513,7 @@ class ArchitectsOfTheWestKingdom extends Table
 
     function stSetup()
     {
-        $players = self::getCollectionFromDb("select * from player order by player_no desc");
+        $players = $this->getCollectionFromDb("select * from player order by player_no desc");
 
         $sql = "INSERT INTO worker (player_id, location) VALUES ";
         $values = array();
@@ -503,7 +523,7 @@ class ArchitectsOfTheWestKingdom extends Table
             }
         }
         $sql .= implode(',', $values);
-        self::DbQuery($sql);
+        $this->DbQuery($sql);
 
         //Apprentices
         $cards = array();
@@ -548,9 +568,9 @@ class ArchitectsOfTheWestKingdom extends Table
         ArchitectsOfTheWestKingdom::$instance->addPending("NULL", "intialCards");
         ArchitectsOfTheWestKingdom::$instance->addPending("NULL", "refillApprentices");
 
-        if (self::getGameStateValue('board_side') == 1) {
-            $players = self::getCollectionFromDb("select * from player order by player_no asc");
-            self::DbQuery("update player set res6 = player_no+2, virtue = 7");
+        if ($this->getGameStateValue('board_side') == 1) {
+            $players = $this->getCollectionFromDb("select * from player order by player_no asc");
+            $this->DbQuery("update player set res6 = player_no+2, virtue = 7");
             foreach ($players as $player_id => $player) {
                 $this->addPendingFirst($player['player_id'], "noworker");
                 $this->addPending($player['player_id'], "pickApprentice", "norefill");
@@ -565,25 +585,25 @@ class ArchitectsOfTheWestKingdom extends Table
                 $nbworkers = $this->asymetricStart[$player['type']]["prisoners"];
 
                 if ($nbworkers > 0) {
-                    $workers = self::getCollectionFromDb("select * from worker where player_id = {$player['player_id']} limit {$nbworkers}");
+                    $workers = $this->getCollectionFromDb("select * from worker where player_id = {$player['player_id']} limit {$nbworkers}");
                     $target = "prison";
                     foreach ($workers as $worker) {
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                             'mobile' => "worker_" . $worker['id'],
                             'parent' => "{$target}",
                             'position' => 'last'
                         ));
-                        self::DbQuery("update worker set location = '{$target}' where id = {$worker['id']}");
+                        $this->DbQuery("update worker set location = '{$target}' where id = {$worker['id']}");
                     }
                     $nbmeeplesLeft = 20 - $nbworkers;
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                         'id' => "res_" . $player['player_id'] . "_8",
                         'nb' => $nbmeeplesLeft
                     ));
                 }
             }
 
-            $player_no = self::getUniqueValueFromDB("select player_no from player order by virtue desc limit 1");
+            $player_no = $this->getUniqueValueFromDB("select player_no from player order by virtue desc limit 1");
             for ($i = 0; $i < count($players); $i++) {
                 $p = $player_no + $i;
 
@@ -591,7 +611,7 @@ class ArchitectsOfTheWestKingdom extends Table
                     $p -= count($players);
                 }
 
-                $player = self::getObjectFromDB("SELECT * FROM player WHERE player_no = {$p}");
+                $player = $this->getObjectFromDB("SELECT * FROM player WHERE player_no = {$p}");
                 $this->addPendingFirst($player['player_id'], "noworker");
                 $this->addPending($player['player_id'], "pickApprentice", "norefill");
             }
@@ -603,8 +623,8 @@ class ArchitectsOfTheWestKingdom extends Table
     function intialCards($parg1, $parg2, $varg1, $varg2)
     {
 
-        if (self::getGameStateValue('board_side') != 1) {
-            $players = self::getCollectionFromDb("select * from player order by player_no desc");
+        if ($this->getGameStateValue('board_side') != 1) {
+            $players = $this->getCollectionFromDb("select * from player order by player_no desc");
             foreach ($players as $player_id => $player) {
                 $obj = new ARCPlayer($player['player_id']);
                 $obj->gain(null, null, B * $this->asymetricStart[$player['type']]["cards"]);
@@ -616,13 +636,13 @@ class ArchitectsOfTheWestKingdom extends Table
     {
 
         for ($newloc = 1; $newloc <= 8; $newloc++) {
-            $nb = self::getUniqueValueFromDB("select count(*) from apprentice where card_location = 'phapprentice{$newloc}'");
+            $nb = $this->getUniqueValueFromDB("select count(*) from apprentice where card_location = 'phapprentice{$newloc}'");
             if ($nb == 0) {
                 ArchitectsOfTheWestKingdom::$instance->apprentices->pickCardForLocation('deck', 'phapprentice' . $newloc);
                 ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
-                $apprentice = self::getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice{$newloc}' ");
+                $apprentice = $this->getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice{$newloc}' ");
 
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("newapprentice", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("newapprentice", '', array(
                     'card' => $apprentice
                 ));
             }
@@ -649,8 +669,8 @@ class ArchitectsOfTheWestKingdom extends Table
 
     function stDraft()
     {
-        $players = self::getCollectionFromDb("select * from player order by player_no desc");
-        $nbcards = self::getUniqueValueFromDB("select count(*) from building where card_location like 'hand%'");
+        $players = $this->getCollectionFromDb("select * from player order by player_no desc");
+        $nbcards = $this->getUniqueValueFromDB("select count(*) from building where card_location like 'hand%'");
 
         if ($nbcards > count($players) * 2) {
 
@@ -666,16 +686,16 @@ class ArchitectsOfTheWestKingdom extends Table
 
             $this->gamestate->nextState('next');
         } else {
-            $players = self::loadPlayersBasicInfos();
+            $players = $this->loadPlayersBasicInfos();
             if (count($players) > 1) {
-                $nextPlayer = self::createNextPlayerTable(array_keys($players));
+                $nextPlayer = $this->createNextPlayerTable(array_keys($players));
 
                 $sql = "SELECT * from building where card_location like 'selectCards%'";
                 $buildings = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb($sql);
                 foreach ($buildings as $building) {
                     $currentplayer_id = (int) filter_var($building['card_location'], FILTER_SANITIZE_NUMBER_INT);
                     $nextplayer_id = $nextPlayer[$currentplayer_id];
-                    self::DbQuery("update building set card_location = 'selectCards{$nextplayer_id}' where card_id = {$building['card_id']}");
+                    $this->DbQuery("update building set card_location = 'selectCards{$nextplayer_id}' where card_id = {$building['card_id']}");
                 }
             }
 
@@ -687,12 +707,12 @@ class ArchitectsOfTheWestKingdom extends Table
     function stPending()
     {
 
-        $pending =  self::getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+        $pending =  $this->getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
         if ($pending == null) {
             //final bonus
 
             $score = array();
-            $players = self::getCollectionFromDb("select * from player order by player_no desc");
+            $players = $this->getCollectionFromDb("select * from player order by player_no desc");
             foreach ($players as $player_id => $player) {
                 $obj = new ARCPlayer($player['player_id']);
                 $obj->instantFinal();
@@ -701,28 +721,28 @@ class ArchitectsOfTheWestKingdom extends Table
 
             for ($i = 0; $i < count($score); $i++) {
                 for ($j = 0; $j < count($score[$i]); $j++) {
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("finalscore", '', array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("finalscore", '', array(
                         'i' => $i,
                         'j' => $j,
                         'score' => $score[$i][$j]
                     ));
                 }
             }
-            self::setGameStateValue('finish', 1);
+            $this->setGameStateValue('finish', 1);
             $this->gamestate->nextState('end');
         } else {
             $args = $this->callPending($pending, false);
             if ($args == null || count($args['selectable']) == 0) {
                 //no args required, execute
                 $this->callPending($pending, true);
-                self::DbQuery("delete from pending where id=" . $pending['id']);
+                $this->DbQuery("delete from pending where id=" . $pending['id']);
                 $this->gamestate->nextState('same');
             } else if (count($args['selectable']) == 1 && !array_key_exists('Pass', $args['selectable']) && !array_key_exists('Undo', $args['selectable'])) {
                 //AUTO PLAY IF ONLY ONE CHOICE
                 foreach ($args['selectable'] as $arg1 => $argnul) {
                     $this->callPending($pending, true, $arg1);
                 }
-                self::DbQuery("delete from pending where id=" . $pending['id']);
+                $this->DbQuery("delete from pending where id=" . $pending['id']);
                 $this->gamestate->nextState('same');
             } else {
 
@@ -764,7 +784,7 @@ class ArchitectsOfTheWestKingdom extends Table
             switch ($statename) {
                 default:
                     $player_id = $this->getActivePlayerId();
-                    self::DbQuery("delete from pending where player_id = {$player_id}");
+                    $this->DbQuery("delete from pending where player_id = {$player_id}");
                     $this->gamestate->nextState("zombiePass");
                     break;
             }
@@ -809,14 +829,14 @@ class ArchitectsOfTheWestKingdom extends Table
         //            // ! important ! Use DBPREFIX_<table_name> for all tables
         //
         //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-        //            self::applyDbUpgradeToAllDB( $sql );
+        //            $this->applyDbUpgradeToAllDB( $sql );
         //        }
         //        if( $from_version <= 1405061421 )
         //        {
         //            // ! important ! Use DBPREFIX_<table_name> for all tables
         //
         //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-        //            self::applyDbUpgradeToAllDB( $sql );
+        //            $this->applyDbUpgradeToAllDB( $sql );
         //        }
         //        // Please add your future database scheme changes here
         //
@@ -827,7 +847,7 @@ class ArchitectsOfTheWestKingdom extends Table
         if ($from_version <= 2303031527) {
             // ! important ! Use DBPREFIX_<table_name> for all tables
             $sql = "ALTER TABLE DBPREFIX_pending ADD `arg4` varchar(50) NULL";
-            self::applyDbUpgradeToAllDB($sql);
+            $this->applyDbUpgradeToAllDB($sql);
         }
     }
 }

@@ -22,7 +22,7 @@ class building15 extends building
         $player = new ARCPlayer($this->player_id);
         
         $ret['selectable'] =  $player->argtowncenter(null, null)['selectable'];
-        if(self::getUniqueValueFromDB( "select count(*) from worker where location like 'prison_%' and player_id={$this->player_id}") > 0)
+        if(ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB( "select count(*) from worker where location like 'prison_%' and player_id={$this->player_id}") > 0)
         {
             $ret['selectable']["actguardhouse3"] = array();
         }
@@ -45,7 +45,7 @@ class building15 extends building
             else
             {
                 $workerId = (int) filter_var($varg1, FILTER_SANITIZE_NUMBER_INT);
-                $worker = self::getObjectFromDB("SELECT * FROM worker WHERE id=".$workerId);
+                $worker = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM worker WHERE id=".$workerId);
                 $player->towncenter($parg1, $parg2, $varg1, $varg2);                
             }
         }

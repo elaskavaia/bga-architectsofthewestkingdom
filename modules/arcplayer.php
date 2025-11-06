@@ -63,7 +63,8 @@ class ARCPlayer
         return $ret;
     }
 
-    function isUndoAvailable() {
+    function isUndoAvailable()
+    {
         return ArchitectsOfTheWestKingdom::$instance->getGameStateValue('no_undo') == 0;
     }
 
@@ -98,8 +99,8 @@ class ARCPlayer
         }
 
         $argguildhall = $this->argguildhall($parg1, $parg2);
-        if (count($argguildhall['selectable']) > 1) {
-            $ret['selectable']["actguildhall"] = array();
+        if (!$argguildhall['void']) {
+            $ret['selectable']["actguildhall"] = $argguildhall;
         }
 
 
@@ -166,14 +167,14 @@ class ARCPlayer
         ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$action}', location_arg=0 where id = {$worker_id}");
 
         $worker = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM worker WHERE id = {$worker_id}");
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
             'mobile' => "worker_" . $worker['id'],
             'parent' => $worker['location'],
             'position' => 'last'
         ));
 
         $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} places a worker on ${location}'), array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} places a worker on ${location}'), array(
             'player_id' => $this->player_id,
             'player_name' => $this->player_name,
             'id' => "res_" . $this->player_id . "_8",
@@ -212,11 +213,11 @@ class ARCPlayer
                     $cards = ArchitectsOfTheWestKingdom::$instance->buildings->pickCardsForLocation($nbcards, 'deck', 'hand' . $this->player_id);
                     foreach ($cards as $card_id => $card) {
                         $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
-                        ArchitectsOfTheWestKingdom::$instance->notifyPlayer($this->player_id, "newbuilding", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->player($this->player_id, "newbuilding", '', array(
                             'card' => $building
                         ));
                     }
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} gains ${nbdiff} <div class="arcicon res9"></div>'), array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} gains ${nbdiff} <div class="arcicon res9"></div>'), array(
                         'player_id' => $this->player_id,
                         'player_name' => $this->player_name,
                         'id' => "res_" . $this->player_id . "_7",
@@ -249,7 +250,7 @@ class ARCPlayer
             case "taxstand":
                 $tax = ArchitectsOfTheWestKingdom::$instance->getGameStateValue('tax');
                 ArchitectsOfTheWestKingdom::$instance->setGameStateValue('tax', 0);
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counterid", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counterid", '', array(
                     'id' => "taxcpt",
                     'nb' => 0
                 ));
@@ -354,13 +355,13 @@ class ARCPlayer
         if ($nbmeeplesOnLocation == $nbresApp1 || $nbmeeplesOnLocation == $nbresApp2 || $nbmeeplesOnLocation == $nbresApp3) {
             $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice1'");
             ArchitectsOfTheWestKingdom::$instance->apprentices->insertCardOnExtremePosition($apprentice['card_id'], "deck", false);
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("remove", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("remove", '', array(
                 'id' => "apprentice" . $apprentice['card_id']
             ));
 
             $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice2'");
             ArchitectsOfTheWestKingdom::$instance->apprentices->insertCardOnExtremePosition($apprentice['card_id'], "deck", false);
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("remove", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("remove", '', array(
                 'id' => "apprentice" . $apprentice['card_id']
             ));
 
@@ -370,7 +371,7 @@ class ARCPlayer
 
                 ArchitectsOfTheWestKingdom::$instance->DbQuery("update apprentice set card_location = 'phapprentice{$newapprenticeIndex}' where card_id = {$apprentice['card_id']}");
 
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                     'mobile' => "apprentice" . $apprentice['card_id'],
                     'parent' => "phapprentice{$newapprenticeIndex}",
                     'position' => 'last'
@@ -381,7 +382,7 @@ class ARCPlayer
             ArchitectsOfTheWestKingdom::$instance->apprentices->pickCardForLocation('deck', 'phapprentice' . $newloc);
             ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
             $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice{$newloc}' ");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("newapprentice", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("newapprentice", '', array(
                 'card' => $apprentice
             ));
 
@@ -389,13 +390,13 @@ class ARCPlayer
             ArchitectsOfTheWestKingdom::$instance->apprentices->pickCardForLocation('deck', 'phapprentice' . $newloc);
             ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
             $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice{$newloc}' ");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("newapprentice", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("newapprentice", '', array(
                 'card' => $apprentice
             ));
         } else if ($nbmeeplesOnLocation == $nbres1 || $nbmeeplesOnLocation == $nbres2) {
             ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "blackmarketreset");
         } else if ($nbmeeplesOnLocation == $nbmax) {
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("popup", clienttranslate('<b>END OF THE GAME : </b> each player (including the current player) has 1 final turn before the game ends'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("popup", clienttranslate('<b>END OF THE GAME : </b> each player (including the current player) has 1 final turn before the game ends'), array(
                 "msg" => clienttranslate("<b>END OF THE GAME</b>")
             ));
         }
@@ -527,7 +528,7 @@ class ARCPlayer
 
             $target = "reserve_{$this->player_id}";
             foreach ($workers as $worker) {
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                     'mobile' => "worker_" . $worker['id'],
                     'parent' => "{$target}",
                     'position' => 'last'
@@ -535,20 +536,20 @@ class ARCPlayer
             }
             ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}', location_arg=0 where location like 'prison_%' and player_id = {$worker['player_id']}");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("note", clienttranslate('${player_name} releases their workers from prisons'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("note", clienttranslate('${player_name} releases their workers from prisons'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name
             ));
 
             $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                 'id' => "res_" . $this->player_id . "_8",
                 'nb' => $nbmeeplesLeft
             ));
 
             $players = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb("select * from player order by player_no desc");
             foreach ($players as $player) {
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                     'id' => "res_" . $player['player_id'] . "_12",
                     'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM worker WHERE location = 'prison_{$player['player_id']}'")
                 ));
@@ -575,7 +576,7 @@ class ARCPlayer
         $target = "prison";
 
         foreach ($prisonners as $worker) {
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                 'mobile' => "worker_" . $worker['id'],
                 'parent' => "{$target}",
                 'position' => 'last'
@@ -583,7 +584,7 @@ class ARCPlayer
         }
         ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}', location_arg=0 where location = 'prison_{$this->player_id}'");
 
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} sends captured workers to prison'), array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} sends captured workers to prison'), array(
             'id' => "res_" . $this->player_id . "_12",
             'nb' => 0,
             'player_id' => $this->player_id,
@@ -608,7 +609,7 @@ class ARCPlayer
         $target = "reserve_" . $this->player_id;
 
         foreach ($prisonners as $worker) {
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                 'mobile' => "worker_" . $worker['id'],
                 'parent' => "{$target}",
                 'position' => 'last'
@@ -617,7 +618,7 @@ class ARCPlayer
         ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}', location_arg=0 where location = 'prison' and player_id = {$this->player_id}");
 
         $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} releases their workers from Prison'), array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} releases their workers from Prison'), array(
             'player_id' => $this->player_id,
             'player_name' => $this->player_name,
             'id' => "res_" . $this->player_id . "_8",
@@ -636,17 +637,17 @@ class ARCPlayer
      */
     function blackmarketreset($parg1, $parg2, $varg1, $varg2)
     {
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("popup", clienttranslate('<b>Black Market Reset</b>'), array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("popup", clienttranslate('<b>Black Market Reset</b>'), array(
             'msg' => clienttranslate('<b>Black Market Reset</b>')
         ));
 
-        //Step 1
+        //Step 1 - send all worker from blackmarket to prison
         $sql = "SELECT * from worker where location like 'blackmarket%'";
         $workers = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb($sql);
 
         $target = "prison";
         foreach ($workers as $worker) {
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                 'mobile' => "worker_" . $worker['id'],
                 'parent' => "{$target}",
                 'position' => 'last'
@@ -654,25 +655,26 @@ class ARCPlayer
         }
         ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}', location_arg=0 where location like 'blackmarket%'");
 
-        //Step 2
+        //Step 2 - draw new market cards
         $card = ArchitectsOfTheWestKingdom::$instance->blackmarkets->pickCardForLocation('deck', 'discard');
         ArchitectsOfTheWestKingdom::$instance->blackmarkets->playCard($card['id']);
         ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
 
 
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("blackmarket", '', array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("blackmarket", '', array(
             'blackmarket1' => ArchitectsOfTheWestKingdom::$instance->blackmarkets->getCardOnTop("deck"),
             'blackmarket2' => ArchitectsOfTheWestKingdom::$instance->blackmarkets->getCardOnTop("discard")
         ));
 
-        //Step 3
+        //Step 3 activate blackmarketreset abilities
         $arr = array();
         $players = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb("select * from player order by player_no desc");
         foreach ($players as $player) {
             $obj = new ARCPlayer($player['player_id']);
             $obj->addPending("blackmarketreset");
             if ($obj->type == 7) {
-                ArchitectsOfTheWestKingdom::$instance->addPending($player['player_id'], "fara");
+                //ArchitectsOfTheWestKingdom::$instance->addPending($player['player_id'], "fara");
+                $this->fara(null, null, "Confirm", null);
             }
         }
 
@@ -698,7 +700,7 @@ class ARCPlayer
         }
 
         if ($max > 0) {
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("msg", clienttranslate('Most workers in prison : ${max}'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("msg", clienttranslate('Most workers in prison : ${max}'), array(
                 'max' => implode(',', $arrnames)
             ));
 
@@ -718,14 +720,14 @@ class ARCPlayer
         $debt = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM debt WHERE player_id = {$this->player_id} and paid = 0 limit 1");
         if ($debt != null) {
             ArchitectsOfTheWestKingdom::$instance->DbQuery("update debt set paid = 1 where id = {$debt['id']}");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} pays off one debt'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} pays off one debt'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name,
                 'id' => "res_" . $this->player_id . "_13",
                 'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM debt WHERE player_id = {$this->player_id} and paid = 0")
             ));
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                 'id' => "res_" . $this->player_id . "_14",
                 'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM debt WHERE player_id = {$this->player_id} and paid = 1")
             ));
@@ -829,7 +831,7 @@ class ARCPlayer
                 ArchitectsOfTheWestKingdom::$instance->buildings->insertCardOnExtremePosition($buildingId, "cards{$this->player_id}", false);
 
 
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                     'id' => "res_" . $this->player_id . "_7",
                     'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$this->player_id}'")
                 ));
@@ -840,7 +842,7 @@ class ARCPlayer
                 $players = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb("select * from player order by player_no desc");
                 foreach ($players as $player) {
                     if ($player['player_id'] == $this->player_id) {
-                        ArchitectsOfTheWestKingdom::$instance->notifyPlayer($player['player_id'], "move", clienttranslate('${player_name} builds ${building}'), array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->player($player['player_id'], "move", clienttranslate('${player_name} builds ${building}'), array(
                             'player_id' => $this->player_id,
                             'player_name' => $this->player_name,
                             'building' => $building['card_type'],
@@ -849,7 +851,7 @@ class ARCPlayer
                             'position' => 'last'
                         ));
                     } else {
-                        ArchitectsOfTheWestKingdom::$instance->notifyPlayer($player['player_id'], "newbuilding", clienttranslate('${player_name} builds ${building}'), array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->player($player['player_id'], "newbuilding", clienttranslate('${player_name} builds ${building}'), array(
                             'player_id' => $this->player_id,
                             'player_name' => $this->player_name,
                             'building' => $building['card_type'],
@@ -895,7 +897,7 @@ class ARCPlayer
         $this->cathedral++;
 
         ArchitectsOfTheWestKingdom::$instance->DbQuery("UPDATE player SET cathedral = {$this->cathedral} where player_id = {$this->player_id}");
-        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", clienttranslate('${player_name} advances work on the Cathedral'), array(
+        ArchitectsOfTheWestKingdom::$instance->notify->all("move", clienttranslate('${player_name} advances work on the Cathedral'), array(
             'player_id' => $this->player_id,
             'player_name' => $this->player_name,
             'mobile' => "cathedral_" . $this->player_id,
@@ -906,7 +908,7 @@ class ARCPlayer
         $bonus = $this->getAdditionalBonus("cathedral");
         $reward = ArchitectsOfTheWestKingdom::$instance->rewards->pickCardForLocation("deck", "discard");
         if ($reward != null) {
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("reward", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("reward", '', array(
                 'reward' => $reward,
                 'rewardnb' => ArchitectsOfTheWestKingdom::$instance->rewards->countCardInLocation("deck")
             ));
@@ -970,7 +972,7 @@ class ARCPlayer
             $worker = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM worker WHERE id=" . $workerId);
             $target = "reserve_{$this->player_id}";
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                 'mobile' => "worker_" . $workerId,
                 'parent' => "{$target}",
                 'position' => 'last'
@@ -978,14 +980,14 @@ class ARCPlayer
 
             ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}', location_arg=0 where id = {$workerId}");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("note", clienttranslate('${player_name} returns one worker from ${board}'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("note", clienttranslate('${player_name} returns one worker from ${board}'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name,
                 'board' => $worker['location']
             ));
 
             $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                 'id' => "res_" . $this->player_id . "_8",
                 'nb' => $nbmeeplesLeft
             ));
@@ -1079,7 +1081,7 @@ class ARCPlayer
             }
             $nb = 0;
             foreach ($workers as $worker) {
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                     'mobile' => "worker_" . $worker['id'],
                     'parent' => "{$target}",
                     'position' => 'last'
@@ -1088,7 +1090,7 @@ class ARCPlayer
             }
             ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}', location_arg=0 where location = '{$worker['location']}' and player_id = {$worker['player_id']}");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("note", clienttranslate('${player_name} captures ${nb} worker(s) from ${other_player_name} on ${board}'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("note", clienttranslate('${player_name} captures ${nb} worker(s) from ${other_player_name} on ${board}'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name,
                 'other_player_name' => $other_player_name,
@@ -1098,12 +1100,12 @@ class ARCPlayer
 
             if ($this->player_id == $worker['player_id']) {
                 $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                     'id' => "res_" . $this->player_id . "_8",
                     'nb' => $nbmeeplesLeft
                 ));
             } else {
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                     'id' => "res_" . $this->player_id . "_12",
                     'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM worker WHERE location = 'prison_{$this->player_id}'")
                 ));
@@ -1187,7 +1189,7 @@ class ARCPlayer
                     $bonus = $apprentice['bonus'] + 1;
 
                     ArchitectsOfTheWestKingdom::$instance->DbQuery("update apprentice set bonus = {$bonus} where card_id = {$apprentice['card_id']}");
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("countermask", '', array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("countermask", '', array(
                         'id' => $apprentice['card_id'],
                         'nb' => $bonus
                     ));
@@ -1253,11 +1255,11 @@ class ARCPlayer
 
             $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$buildingId}");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyPlayer($this->player_id, "remove", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->player($this->player_id, "remove", '', array(
                 'id' => $varg1
             ));
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} discards ${building}'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} discards ${building}'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name,
                 'building' => $building['card_type'],
@@ -1327,7 +1329,7 @@ class ARCPlayer
 
             $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_id = {$apprenticeId}");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("remove", clienttranslate('${player_name} discards ${apprentice}'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("remove", clienttranslate('${player_name} discards ${apprentice}'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name,
                 'apprentice' => $apprentice['card_type'],
@@ -1481,7 +1483,7 @@ class ARCPlayer
         ArchitectsOfTheWestKingdom::$instance->buildings->insertCardOnExtremePosition($buildingId, "hand{$this->player_id}", false);
 
         $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$buildingId}");
-        ArchitectsOfTheWestKingdom::$instance->notifyPlayer($this->player_id, "move", '', array(
+        ArchitectsOfTheWestKingdom::$instance->notify->player($this->player_id, "move", '', array(
             'mobile' => "building" . $buildingId,
             'parent' => "hand" . $this->player_id,
             'position' => 'last'
@@ -1556,7 +1558,7 @@ class ARCPlayer
             ArchitectsOfTheWestKingdom::$instance->apprentices->insertCardOnExtremePosition($apprenticeId, "cards{$this->player_id}", false);
 
             $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_id = {$apprenticeId}");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", clienttranslate('${player_name} hires ${apprentice}'), array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("move", clienttranslate('${player_name} hires ${apprentice}'), array(
                 'player_id' => $this->player_id,
                 'player_name' => $this->player_name,
                 'apprentice' => $apprentice['card_type'],
@@ -1569,7 +1571,7 @@ class ARCPlayer
                 $this->gain("apprentice" . $apprentice['card_id'], null, SI * $apprentice['bonus']);
 
                 ArchitectsOfTheWestKingdom::$instance->DbQuery("update apprentice set bonus = 0 where card_id = {$apprentice['card_id']}");
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("countermask", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("countermask", '', array(
                     'id' => $apprentice['card_id'],
                     'nb' => 0
                 ));
@@ -1589,7 +1591,7 @@ class ARCPlayer
 
                     ArchitectsOfTheWestKingdom::$instance->DbQuery("update apprentice set card_location = 'phapprentice{$newapprenticeIndex}' where card_id = {$apprentice['card_id']}");
 
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                         'mobile' => "apprentice" . $apprentice['card_id'],
                         'parent' => "phapprentice{$newapprenticeIndex}",
                         'position' => 'last'
@@ -1601,7 +1603,7 @@ class ARCPlayer
                 ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
                 $apprentice = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM apprentice WHERE card_location = 'phapprentice{$newloc}' ");
 
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("newapprentice", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("newapprentice", '', array(
                     'card' => $apprentice
                 ));
             }
@@ -1706,13 +1708,13 @@ class ARCPlayer
                 $this->resources[$type] += $nb;
                 ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set res{$type} = " . $this->resources[$type] . " where player_id = " . $this->player_id);
 
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                     'id' => "res_" . $this->player_id . "_" . $type,
                     'nb' => $this->resources[$type]
                 ));
 
                 $costinv = min($nb, 9) * pow(10, $type);
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("gain", clienttranslate('${player_name} gains ${costnb} <div id="0" class="arcicon res${typeres}"></div>'), array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("gain", clienttranslate('${player_name} gains ${costnb} <div id="0" class="arcicon res${typeres}"></div>'), array(
                     'player_id' => $this->player_id,
                     'player_name' => $this->player_name,
                     'costnb' => $nb,
@@ -1730,7 +1732,7 @@ class ARCPlayer
                         if ($debt != null) {
                             ArchitectsOfTheWestKingdom::$instance->DbQuery("delete from debt where id = {$debt['id']}");
 
-                            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} destroys one unpaid debt'), array(
+                            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} destroys one unpaid debt'), array(
                                 'id' => "res_" . $this->player_id . "_13",
                                 'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM debt WHERE player_id = {$this->player_id} and paid = 0"),
                                 'player_id' => $this->player_id,
@@ -1748,7 +1750,7 @@ class ARCPlayer
                     $buildingId = (int) filter_var($source, FILTER_SANITIZE_NUMBER_INT);
                     $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$buildingId}");
 
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", clienttranslate('${player_name} gains ${costnb} <div id="0" class="arcicon res${typeres}"></div> from ${building}'), array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("move", clienttranslate('${player_name} gains ${costnb} <div id="0" class="arcicon res${typeres}"></div> from ${building}'), array(
                         'mobile' => "virtue_" . $this->player_id,
                         'parent' => "virtue" . $this->virtue,
                         'position' => 'last',
@@ -1760,7 +1762,7 @@ class ARCPlayer
                     ));
                 } else {
 
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", clienttranslate('${player_name} gains ${costnb} <div id="0" class="arcicon res${typeres}"></div>'), array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("move", clienttranslate('${player_name} gains ${costnb} <div id="0" class="arcicon res${typeres}"></div>'), array(
                         'mobile' => "virtue_" . $this->player_id,
                         'parent' => "virtue" . $this->virtue,
                         'position' => 'last',
@@ -1794,7 +1796,7 @@ class ARCPlayer
                         $this->resources[$type] += $nb;
                         ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set res{$type} = " . $this->resources[$type] . " where player_id = " . $this->player_id);
 
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                             'id' => "res_" . $this->player_id . "_{$type}",
                             'nb' => $this->resources[$type]
                         ));
@@ -1805,7 +1807,7 @@ class ARCPlayer
                                 $debt = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM debt WHERE player_id = {$this->player_id} and paid = 0 limit 1");
                                 if ($debt != null) {
                                     ArchitectsOfTheWestKingdom::$instance->DbQuery("delete from debt where id = {$debt['id']}");
-                                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} destroys one unpaid debt'), array(
+                                    ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} destroys one unpaid debt'), array(
                                         'id' => "res_" . $this->player_id . "_13",
                                         'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM debt WHERE player_id = {$this->player_id} and paid = 0"),
                                         'player_id' => $this->player_id,
@@ -1819,7 +1821,7 @@ class ARCPlayer
                         }
 
                         ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set virtue = " . $this->virtue . " where player_id = " . $this->player_id);
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                             'mobile' => "virtue_" . $this->player_id,
                             'parent' => "virtue" . $this->virtue,
                             'position' => 'last'
@@ -1830,11 +1832,11 @@ class ARCPlayer
                         ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
                         foreach ($cards as $card_id => $card) {
                             $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
-                            ArchitectsOfTheWestKingdom::$instance->notifyPlayer($this->player_id, "newbuilding", '', array(
+                            ArchitectsOfTheWestKingdom::$instance->notify->player($this->player_id, "newbuilding", '', array(
                                 'card' => $building
                             ));
                         }
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                             'id' => "res_" . $this->player_id . "_7",
                             'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$this->player_id}'"),
                         ));
@@ -1849,7 +1851,7 @@ class ARCPlayer
                     $buildingId = (int) filter_var($parg1, FILTER_SANITIZE_NUMBER_INT);
                     $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$buildingId}");
 
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("gain", clienttranslate('${player_name} gains ${cost} from ${building}'), array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("gain", clienttranslate('${player_name} gains ${cost} from ${building}'), array(
                         'player_id' => $this->player_id,
                         'player_name' => $this->player_name,
                         'cost' => $varg1,
@@ -1859,7 +1861,7 @@ class ARCPlayer
                         'target' => "playerboard" . $this->player_id,
                     ));
                 } else {
-                    ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("gain", clienttranslate('${player_name} gains ${cost}'), array(
+                    ArchitectsOfTheWestKingdom::$instance->notify->all("gain", clienttranslate('${player_name} gains ${cost}'), array(
                         'player_id' => $this->player_id,
                         'player_name' => $this->player_name,
                         'cost' => $varg1,
@@ -1924,7 +1926,7 @@ class ARCPlayer
                         }
                         ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set res{$type} = " . $this->resources[$type] . " where player_id = " . $this->player_id);
 
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                             'id' => "res_" . $this->player_id . "_{$type}",
                             'nb' => $this->resources[$type]
                         ));
@@ -1933,7 +1935,7 @@ class ARCPlayer
                         $this->resources[SILVER] -= $nb;
                         ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set res6 = " . $this->resources[SILVER] . " where player_id = " . $this->player_id);
 
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                             'id' => "res_" . $this->player_id . "_" . SILVER,
                             'nb' => $this->resources[SILVER]
                         ));
@@ -1942,7 +1944,7 @@ class ARCPlayer
                         $tax += $nb;
                         ArchitectsOfTheWestKingdom::$instance->setGameStateValue('tax', $tax);
 
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counterid", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("counterid", '', array(
                             'id' => "taxcpt",
                             'nb' => $tax
                         ));
@@ -1957,7 +1959,7 @@ class ARCPlayer
                         }
 
                         ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set virtue = " . $this->virtue . " where player_id = " . $this->player_id);
-                        ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                        ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                             'mobile' => "virtue_" . $this->player_id,
                             'parent' => "virtue" . $this->virtue,
                             'position' => 'last'
@@ -1966,11 +1968,11 @@ class ARCPlayer
                     {
                         for ($i = 0; $i < $nb; $i++) {
                             if ($this->type == 2) {
-                                ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "clovis");
+                                ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "hugo");
                             } else {
                                 ArchitectsOfTheWestKingdom::$instance->DbQuery("insert into debt (player_id) VALUES ({$this->player_id})");
 
-                                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+                                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                                     'id' => "res_" . $this->player_id . "_13",
                                     'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM debt WHERE player_id = {$this->player_id} and paid = 0"),
                                     'player_id' => $this->player_id,
@@ -2002,7 +2004,7 @@ class ARCPlayer
                 }
 
 
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("gain", $txt, array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("gain", $txt, array(
                     'player_id' => $this->player_id,
                     'player_name' => $this->player_name,
                     'cost' => $varg1,
@@ -2016,11 +2018,11 @@ class ARCPlayer
     }
 
     /**
-     * Prepares Clovis character ability options (avoid debt with silver)
+     * Prepares Hugo character ability options (avoid debt with silver)
      * @param mixed $parg1 Parameter 1
      * @param mixed $parg2 Parameter 2
      */
-    function argclovis($parg1, $parg2)
+    function arghugo($parg1, $parg2)
     {
         $ret = array();
         $ret['selectable'] = array();
@@ -2031,9 +2033,9 @@ class ARCPlayer
         if ($this->resources[SILVER] >= 2) {
             $ret['buttons'][] = 'Confirm';
             $ret['selectable']['Confirm'] = array();
-            $ret['buttons'][] = 'Pass';
-            $ret['selectable']['Pass'] = array();
         }
+        $ret['buttons'][] = 'Pass';
+        $ret['selectable']['Pass'] = array();
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
             $ret['selectable']['Undo'] = array();
@@ -2042,20 +2044,20 @@ class ARCPlayer
     }
 
     /**
-     * Executes Clovis character ability - pay silver to avoid debt
+     * Executes Hugo character ability - pay silver to avoid debt
      * @param mixed $parg1 Parameter 1
      * @param mixed $parg2 Parameter 2
      * @param string $varg1 Choice ("Confirm" or "Pass")
      * @param mixed $varg2 Value argument 2
      */
-    function clovis($parg1, $parg2, $varg1, $varg2)
+    function hugo($parg1, $parg2, $varg1, $varg2)
     {
         if ($varg1 == 'Confirm') {
             $this->pay(null, null, 2 * SI);
         } else {
             ArchitectsOfTheWestKingdom::$instance->DbQuery("insert into debt (player_id) VALUES ({$this->player_id})");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counter", '', array(
                 'id' => "res_" . $this->player_id . "_13",
                 'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) FROM debt WHERE player_id = {$this->player_id} and paid = 0"),
                 'player_id' => $this->player_id,
@@ -2239,7 +2241,7 @@ class ARCPlayer
         if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('live_scoring') == 2 || $final) {
             ArchitectsOfTheWestKingdom::$instance->DbQuery("UPDATE player SET player_score = {$vp}, player_score_aux = {$aux} where player_id = {$this->player_id}");
 
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counterid", '', array(
+            ArchitectsOfTheWestKingdom::$instance->notify->all("counterid", '', array(
                 'id' => 'player_score_' . $this->player_id,
                 'nb' => $vp
             ));
@@ -2350,21 +2352,21 @@ class ARCPlayer
             $target = "reserve_" . $this->player_id;
 
             foreach ($prisonners as $worker) {
-                ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("move", '', array(
+                ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
                     'mobile' => "worker_" . $worker['id'],
                     'parent' => "{$target}",
                     'position' => 'last'
                 ));
                 ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$target}' where id = {$worker['id']}");
+                $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
+                ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} releases 1 worker from prison (Fara)'), array(
+                    'player_id' => $this->player_id,
+                    'player_name' => $this->player_name,
+                    'id' => "res_" . $this->player_id . "_8",
+                    'nb' => $nbmeeplesLeft
+                ));
+                break;
             }
-
-            $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-            ArchitectsOfTheWestKingdom::$instance->notifyAllPlayers("counter", clienttranslate('${player_name} releases 1 worker from prison'), array(
-                'player_id' => $this->player_id,
-                'player_name' => $this->player_name,
-                'id' => "res_" . $this->player_id . "_8",
-                'nb' => $nbmeeplesLeft
-            ));
         }
     }
 }

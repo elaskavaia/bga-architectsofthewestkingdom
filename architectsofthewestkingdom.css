@@ -32,7 +32,7 @@
   font-family: "official";
   color: white;
   -webkit-text-stroke: 3px black;
-  -webkit-transform: scale(0);
+  transform: scale(0);
   transform-origin: center;
 }
 
@@ -102,6 +102,7 @@ html {
   -webkit-filter: drop-shadow(1px 1px 2px black);
   position: relative;
   border-radius: 5px;
+  flex: none;
 }
 
 .playerleft {
@@ -259,9 +260,20 @@ html {
 .apprentice.selectable {
   border: solid 2px magenta;
   filter: drop-shadow(1px 1px 17px magenta);
-  -webkit-filter: drop-shadow(1px 1px 17px magenta);
 }
 
+.selectable_later {
+  outline: solid 2px green;
+}
+.selectable_later::after {
+  content: "\f00c";
+  position: absolute;
+  font-size: x-large;
+  color: green;
+  font-family: "FontAwesome";
+  bottom: 5%;
+  right: 5%;
+}
 .apprentice_name {
   font-size: 16px;
   width: 172px !important;

@@ -9,10 +9,10 @@ class building10 extends building
     
     public function instant($player)
     {
-        $players = self::getCollectionFromDb( "select * from player order by player_no desc" );
+        $players = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb( "select * from player order by player_no desc" );
         foreach($players as $player)
         {
-            $nbmeeplesLeft = self::getUniqueValueFromDB( "select count(*) from worker where player_id = {$player['player_id']} and  location = 'prison'");
+            $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB( "select count(*) from worker where player_id = {$player['player_id']} and  location = 'prison'");
             if($nbmeeplesLeft>=3)
             {
                 $obj = new ARCPlayer($player['player_id']);

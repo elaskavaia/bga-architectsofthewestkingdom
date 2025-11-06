@@ -15,25 +15,14 @@
  *
  */
 
-define([
-  "dojo",
-  "dojo/_base/declare",
-  "ebg/core/gamegui",
-  "ebg/counter",
-  "./modules/archelper",
-], function (dojo, declare) {
+define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modules/archelper"], function (dojo, declare) {
   return declare("bgagame.architectsofthewestkingdom", ebg.core.gamegui, {
     constructor: function () {
       this.helper = new bgagame.archelper();
       this.height = dojo.marginBox("gboard").h + 580;
       this.zoomScales = [1, 0.8, 0.6, 0.4];
       this.zoomIndex = 0;
-      dojo.connect(
-        window,
-        "onresize",
-        this,
-        dojo.hitch(this, "adaptViewportSize")
-      );
+      dojo.connect(window, "onresize", this, dojo.hitch(this, "adaptViewportSize"));
     },
 
     adaptViewportSize: function () {
@@ -52,10 +41,9 @@ define([
 
       var percentageOn1 = contentWidth / rowWidth;
 
-
       zoomWrapper.style.transform = "scale(" + percentageOn1 + ")";
       zoomWrapper.style.height = this.height * percentageOn1 + "px";
-	  this.writeLocalProp("zoomIndex",String(this.zoomIndex));
+      this.writeLocalProp("zoomIndex", String(this.zoomIndex));
     },
 
     /*
@@ -73,38 +61,29 @@ define([
 
     setup: function (gamedatas) {
       this.players = gamedatas.players;
-	  this.zoomIndex = parseInt(this.readLocalProp("zoomIndex",0));
+      this.zoomIndex = parseInt(this.readLocalProp("zoomIndex", 0));
       var nbp = 0;
       // Setting up player boards
       for (var player_id in gamedatas.players) {
         nbp++;
         var player = gamedatas.players[player_id];
-        var type = Math.floor((player["type"] % 10) / 2);
+        const type = Math.floor((player["type"] % 10) / 2);
 
         player["posx"] = 25 * type;
-        dojo.place(
-          this.format_block("jstpl_res", player),
-          $("player_board_" + player["id"])
-        );
+        dojo.place(this.format_block("jstpl_res", player), $("player_board_" + player["id"]));
         for (let i = 1; i <= 8; i++) {
-          dojo
-            .query(".res_" + player["id"] + "_" + i)
-            .forEach(function (selectTag) {
-              selectTag.innerHTML = player["res" + i];
-            });
-        }
-        dojo
-          .query(".res_" + player["id"] + "_" + 7)
-          .forEach(function (selectTag) {
-            selectTag.innerHTML += "/6";
+          dojo.query(".res_" + player["id"] + "_" + i).forEach(function (selectTag) {
+            selectTag.innerHTML = player["res" + i];
           });
+        }
+        dojo.query(".res_" + player["id"] + "_" + 7).forEach(function (selectTag) {
+          selectTag.innerHTML += "/6";
+        });
 
         for (let i = 12; i <= 14; i++) {
-          dojo
-            .query(".res_" + player["id"] + "_" + i)
-            .forEach(function (selectTag) {
-              selectTag.innerHTML = player["res" + i];
-            });
+          dojo.query(".res_" + player["id"] + "_" + i).forEach(function (selectTag) {
+            selectTag.innerHTML = player["res" + i];
+          });
         }
 
         dojo.place(
@@ -123,14 +102,11 @@ define([
         );
 
         dojo.query("#player" + player["id"]).addClass("type" + player["type"]);
-        dojo.style("playerboard" + player["id"], {
-          "background-position":
-            100 * (player["type"] % 2) +
-            "% " +
-            11.111 * Math.floor(player["type"] / 2) +
-            "%",
+        const playerBoard = "playerboard" + player["id"];
+        dojo.style(playerBoard, {
+          "background-position": 100 * (player["type"] % 2) + "% " + 11.111 * Math.floor(player["type"] / 2) + "%",
         });
-
+        $(playerBoard).dataset["playertype"] = player["type"];
         dojo.style("res8_" + player["id"], {
           "background-position": 25 * type + "% 0%",
         });
@@ -139,33 +115,22 @@ define([
           selectTag.innerHTML = name;
         });
         if (this.helper.bosses[player["type"]]["desc"] != null) {
-          var html =
-            "<b>" +
-            name +
-            " :</b><br/><div>" +
-            _(this.helper.bosses[player["type"]]["desc"]) +
-            "</div>";
-          this.addTooltipHtml("playerboard" + player["id"], html, 1000);
+          var html = "<b>" + name + " :</b><br/><div>" + _(this.helper.bosses[player["type"]]["desc"]) + "</div>";
+          this.addTooltipHtml(playerBoard, html, 1000);
         }
 
         if (this.player_id != player["id"]) {
           dojo.query("#lowerlane" + player["id"]).forEach(dojo.destroy);
           dojo.query("#lowerlaneselect" + player["id"]).forEach(dojo.destroy);
         } else {
-          var type = Math.floor((player["type"] % 10) / 2);
           dojo.query("#gboard").addClass("meepletype" + type);
         }
 
         if ($("eye_" + player["id"]) == null) {
-          dojo.place(
-            this.format_block("jstpl_view", player),
-            dojo.query("#player_board_" + player["id"] + " .player_score")[0]
-          );
+          dojo.place(this.format_block("jstpl_view", player), dojo.query("#player_board_" + player["id"] + " .player_score")[0]);
         }
         if (this.player_id != player_id) {
-          const wrapper = document.querySelector(
-            `#player${player_id} #hand_area`
-          );
+          const wrapper = document.querySelector(`#player${player_id} #hand_area`);
           if (wrapper) wrapper.remove();
         }
       }
@@ -176,10 +141,7 @@ define([
         var type = Math.floor((player["type"] % 10) / 2);
         worker["posx"] = 25 * type;
         worker["type"] = type;
-        dojo.place(
-          this.format_block("jstpl_worker", worker),
-          $(worker.location)
-        );
+        dojo.place(this.format_block("jstpl_worker", worker), $(worker.location));
       }
 
       for (var card_id in gamedatas.apprentices) {
@@ -308,7 +270,7 @@ define([
         handArea.dataset.open = handOpen;
 
         let value = this.readLocalProp("handplace", "static");
-		if (value != "static") value = "floating";
+        if (value != "static") value = "floating";
         this.setLocalProperty("handplace", value);
         this.reflowHandPosition();
 
@@ -326,7 +288,7 @@ define([
             if (value == "static") value = "floating";
             else value = "static";
             this.setLocalProperty("handplace", value);
-			this.reflowHandPosition();
+            this.reflowHandPosition();
           });
           this.addTooltip(node.id, "Click to make hand float/static", "");
         });
@@ -377,8 +339,9 @@ define([
     //                  You can use this method to perform some user interface changes at this moment.
     //
     onEnteringState: function (stateName, args) {
-      this.stateName = stateName;
+      console.log("onEnteringState", stateName, args);
       dojo.query(".selectable").removeClass("selectable");
+      dojo.query(".selectable_later").removeClass("selectable_later");
 
       switch (stateName) {
         case "playerDraft":
@@ -406,10 +369,7 @@ define([
           if (this.isCurrentPlayerActive()) {
             if (args.args.titleyou != null) {
               $("pagemaintitletext").innerHTML = this.format_string_recursive(
-                _(args.args.titleyou)
-                  .replace("${you}", this.divYou())
-                  .replace("#nb#", args.args.nb)
-                  .replace("#nb2#", args.args.nb2),
+                _(args.args.titleyou).replace("${you}", this.divYou()).replace("#nb#", args.args.nb).replace("#nb2#", args.args.nb2),
                 args.args
               );
             }
@@ -426,6 +386,12 @@ define([
             if (args.args.selectable != null) {
               for (var sid in args.args.selectable) {
                 dojo.query("#" + sid).addClass("selectable");
+                const info = args.args.selectable[sid];
+                if (info.selectable)
+                  for (let subitem in info.selectable) {
+                    const div = $(subitem);
+                    if (div) div.classList.add("selectable_later");
+                  }
               }
             }
             this.args = args.args;
@@ -480,20 +446,10 @@ define([
             for (var nb in args.buttons) {
               if (args.buttons[nb].startsWith("res")) {
                 if (args.buttons[nb] == "resgh3") {
-                  var lbl =
-                    '<div id="0" class="arcicon res10"></div><div id="0" class="arcicon res11"></div>';
-                  this.addActionButton(
-                    args.buttons[nb],
-                    lbl,
-                    "onButton",
-                    null,
-                    null,
-                    col
-                  );
+                  var lbl = '<div id="0" class="arcicon res10"></div><div id="0" class="arcicon res11"></div>';
+                  this.addActionButton(args.buttons[nb], lbl, "onButton", null, null, col);
                 } else if (args.storehouse != null) {
-                  var full = parseInt(
-                    args.buttons[nb].split("to")[0].replace(/[^0-9]/g, "")
-                  );
+                  var full = parseInt(args.buttons[nb].split("to")[0].replace(/[^0-9]/g, ""));
                   var lbl = "";
                   for (var i = 1; i <= 10; i++) {
                     var isolated = Math.floor(full / Math.pow(10, i)) % 10;
@@ -509,9 +465,7 @@ define([
                   }
 
                   lbl += ' <i class="fa fa-arrow-right"></i> ';
-                  var full = parseInt(
-                    args.buttons[nb].split("to")[1].replace(/[^0-9]/g, "")
-                  );
+                  var full = parseInt(args.buttons[nb].split("to")[1].replace(/[^0-9]/g, ""));
                   for (var i = 1; i <= 10; i++) {
                     var isolated = Math.floor(full / Math.pow(10, i)) % 10;
                     if (isolated > 0) {
@@ -525,14 +479,7 @@ define([
                     }
                   }
 
-                  this.addActionButton(
-                    args.buttons[nb],
-                    lbl,
-                    "onButton",
-                    null,
-                    null,
-                    col
-                  );
+                  this.addActionButton(args.buttons[nb], lbl, "onButton", null, null, col);
                 } else {
                   var full = parseInt(args.buttons[nb].replace(/[^0-9]/g, ""));
                   var lbl = "";
@@ -548,32 +495,14 @@ define([
                       });
                     }
                   }
-                  this.addActionButton(
-                    args.buttons[nb],
-                    lbl,
-                    "onButton",
-                    null,
-                    null,
-                    col
-                  );
+                  this.addActionButton(args.buttons[nb], lbl, "onButton", null, null, col);
                 }
               } else {
                 var col = "gray";
-                if (
-                  args.buttons[nb] != "Pass" &&
-                  args.buttons[nb] != "Undo" &&
-                  args.buttons[nb] != "Skip"
-                ) {
+                if (args.buttons[nb] != "Pass" && args.buttons[nb] != "Undo" && args.buttons[nb] != "Skip") {
                   col = "blue";
                 }
-                this.addActionButton(
-                  args.buttons[nb],
-                  _(this.helper.buttons[args.buttons[nb]]),
-                  "onButton",
-                  null,
-                  null,
-                  col
-                );
+                this.addActionButton(args.buttons[nb], _(this.helper.buttons[args.buttons[nb]]), "onButton", null, null, col);
               }
             }
             break;
@@ -591,14 +520,7 @@ define([
               }
             }
 
-            this.addActionButton(
-              "cancel",
-              _("Cancel"),
-              "onOpCancel",
-              null,
-              null,
-              "gray"
-            );
+            this.addActionButton("cancel", _("Cancel"), "onOpCancel", null, null, "gray");
             break;
         }
       }
@@ -610,14 +532,7 @@ define([
     divYou: function () {
       var color = this.players[this.player_id].color;
       var color_bg = "";
-      var you =
-        '<span style="font-weight:bold;color:#' +
-        color +
-        ";" +
-        color_bg +
-        '">' +
-        _("You") +
-        "</span>";
+      var you = '<span style="font-weight:bold;color:#' + color + ";" + color_bg + '">' + _("You") + "</span>";
       return you;
     },
 
@@ -627,16 +542,7 @@ define([
         var color = player.color;
         var name = player.name;
         var color_bg = "";
-        log = log.replace(
-          name,
-          '<span style="font-weight:bold;color:#' +
-            color +
-            ";" +
-            color_bg +
-            '">' +
-            name +
-            "</span>"
-        );
+        log = log.replace(name, '<span style="font-weight:bold;color:#' + color + ";" + color_bg + '">' + name + "</span>");
       }
 
       return log;
@@ -645,14 +551,7 @@ define([
       var color = this.players[this.getActivePlayerId()].color;
       var name = this.players[this.getActivePlayerId()].name;
       var color_bg = "";
-      var you =
-        '<span style="font-weight:bold;color:#' +
-        color +
-        ";" +
-        color_bg +
-        '">' +
-        name +
-        "</span>";
+      var you = '<span style="font-weight:bold;color:#' + color + ";" + color_bg + '">' + name + "</span>";
       return you;
     },
 
@@ -667,37 +566,29 @@ define([
             for (var i = 1; i <= 10; i++) {
               var isolated = Math.floor(full / Math.pow(10, i)) % 10;
               if (isolated > 0) {
-                lbl +=
-                  isolated +
-                  this.format_block("jstpl_reslog", { id: 0, type: i });
+                lbl += isolated + this.format_block("jstpl_reslog", { id: 0, type: i });
               }
             }
             args["cost"] = lbl;
           }
 
-          if (args["location"] != null) {
+          if (args["location"]) {
             args["location"] = _(this.helper.boards[args["location"]]);
           }
 
-          if (args["apprentice"] != null) {
-            args["apprentice"] = _(
-              this.helper.apprentices[args["apprentice"]]["name"]
-            );
+          if (args["apprentice"]) {
+            args["apprentice"] = _(this.helper.apprentices[args["apprentice"]]["name"]);
           }
 
-          if (args["building"] != null) {
-            args["building"] = _(
-              this.helper.buildings[args["building"]]["name"]
-            );
+          if (args["building"]) {
+            args["building"] = _(this.helper.buildings[args["building"]]["name"]);
           }
-          if (args["board"] != null) {
+          if (args["board"]) {
             args["board"] = _(this.helper.boards[args["board"]]);
           }
 
           if (args["other_player_name"] != null) {
-            args["other_player_name"] = this.replacePlayerName(
-              args["other_player_name"]
-            );
+            args["other_player_name"] = this.replacePlayerName(args["other_player_name"]);
           }
         }
       } catch (e) {
@@ -706,12 +597,7 @@ define([
       return this.inherited(arguments);
     },
 
-    attachToNewParentNoDestroy: function (
-      mobile_in,
-      new_parent_in,
-      relation,
-      place_position
-    ) {
+    attachToNewParentNoDestroy: function (mobile_in, new_parent_in, relation, place_position) {
       const mobile = $(mobile_in);
       const new_parent = $(new_parent_in);
 
@@ -735,29 +621,20 @@ define([
     },
 
     addDebt: function (debt) {
-      dojo.place(
-        this.format_block("jstpl_debt", debt),
-        $("cards" + debt.player_id)
-      );
+      dojo.place(this.format_block("jstpl_debt", debt), $("cards" + debt.player_id));
       debt.paid = 0;
-      var html =
-        '<div class="anatooltip"><div>' + this.format_block("jstpl_debt", debt);
+      var html = '<div class="anatooltip"><div>' + this.format_block("jstpl_debt", debt);
       debt.paid = 1;
       html +=
         this.format_block("jstpl_debt", debt) +
         "</div><div>" +
-        _(
-          "<b>Debt :</b>Unpaid debt make you loose 2 VP or pay it to gain 1 Virtue"
-        ) +
+        _("<b>Debt :</b>Unpaid debt make you loose 2 VP or pay it to gain 1 Virtue") +
         "</div></div>";
       this.addTooltipHtml("debt_" + debt["id"], html, 1000);
     },
 
     returnDebt: function (debt) {
-      dojo.place(
-        this.format_block("jstpl_debt", debt),
-        $("cards" + debt.player_id)
-      );
+      dojo.place(this.format_block("jstpl_debt", debt), $("cards" + debt.player_id));
     },
 
     addBuilding: function (card) {
@@ -772,13 +649,8 @@ define([
       if (this.helper.buildings[card["card_type"]]["per"]) {
         card["per"] = _(this.helper.translates["per"]);
       }
-      dojo.place(
-        this.format_block("jstpl_building", card),
-        $(card.card_location)
-      );
-      dojo
-        .query("#building" + card["card_id"])
-        .connect("onclick", this, "onSelect");
+      dojo.place(this.format_block("jstpl_building", card), $(card.card_location));
+      dojo.query("#building" + card["card_id"]).connect("onclick", this, "onSelect");
 
       var html =
         '<div class="anatooltip"><div class="anattbuilding">' +
@@ -796,13 +668,8 @@ define([
       card["posy"] = Math.floor(card["card_type"] / 6) * 14.286;
       card["name"] = _(this.helper.apprentices[card["card_type"]]["name"]);
       card["target"] = _(this.helper.apprentices[card["card_type"]]["target"]);
-      dojo.place(
-        this.format_block("jstpl_apprentice", card),
-        $(card.card_location)
-      );
-      dojo
-        .query("#apprentice" + card["card_id"])
-        .connect("onclick", this, "onSelect");
+      dojo.place(this.format_block("jstpl_apprentice", card), $(card.card_location));
+      dojo.query("#apprentice" + card["card_id"]).connect("onclick", this, "onSelect");
 
       if (card["bonus"] > 0) {
         dojo.query("#silverbonushead" + card["card_id"]).removeClass("hidden");
@@ -832,12 +699,10 @@ define([
       evt.preventDefault();
       if (dojo.hasClass("score", "mini")) {
         dojo.query("#score").removeClass("mini");
-        document.getElementById("closescore").innerHTML =
-          '<i class="fa fa-compress" aria-hidden="true"></i>';
+        document.getElementById("closescore").innerHTML = '<i class="fa fa-compress" aria-hidden="true"></i>';
       } else {
         dojo.query("#score").addClass("mini");
-        document.getElementById("closescore").innerHTML =
-          '<i class="fa fa-expand" aria-hidden="true"></i>';
+        document.getElementById("closescore").innerHTML = '<i class="fa fa-expand" aria-hidden="true"></i>';
       }
     },
 
@@ -845,10 +710,7 @@ define([
       // Preventing default browser reaction
       dojo.stopEvent(evt);
 
-      if (
-        !this.isCurrentPlayerActive() ||
-        !evt.currentTarget.classList.contains("selectable")
-      ) {
+      if (!this.isCurrentPlayerActive() || !evt.currentTarget.classList.contains("selectable")) {
         return;
       }
 
@@ -883,9 +745,7 @@ define([
         } else {
           dojo.query(".selectable").removeClass("selectable");
           this.setClientState("client_selectTarget", {
-            descriptionmyturn: _(
-              this.args.selectable[this.selected]["titleyou"]
-            ),
+            descriptionmyturn: _(this.args.selectable[this.selected]["titleyou"]),
             args: {},
           });
         }
@@ -936,7 +796,7 @@ define([
             
             In this method, you associate each of your game notifications with your local method to handle it.
             
-            Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
+            Note: game notification names correspond to "notify->all" and "notify->player" calls in
                   your architectsofthewestkingdom.game.php file.
         
         */
@@ -1055,16 +915,8 @@ define([
           for (var z = 0; z < isolated; z++) {
             var id = Math.floor(Math.random() * 100000);
 
-            dojo.place(
-              this.format_block("jstpl_resmove", { id: id, type: i }),
-              $(notif.args.source)
-            );
-            this.slideToObjectAndDestroy(
-              "resmove" + id,
-              notif.args.target,
-              500,
-              j * 300
-            );
+            dojo.place(this.format_block("jstpl_resmove", { id: id, type: i }), $(notif.args.source));
+            this.slideToObjectAndDestroy("resmove" + id, notif.args.target, 500, j * 300);
             j++;
           }
         }
@@ -1093,16 +945,9 @@ define([
     },
 
     notif_move: function (notif) {
-      this.attachToNewParentNoDestroy(
-        notif.args.mobile,
-        notif.args.parent,
-        notif.args.position
-      );
+      this.attachToNewParentNoDestroy(notif.args.mobile, notif.args.parent, notif.args.position);
 
-      if (
-        dojo.hasClass(notif.args.parent, "meeplelocation") ||
-        notif.args.parent.startsWith("cards")
-      ) {
+      if (dojo.hasClass(notif.args.parent, "meeplelocation") || notif.args.parent.startsWith("cards")) {
         this.sortChildrenDivsById(notif.args.parent);
       }
 

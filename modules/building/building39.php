@@ -8,7 +8,7 @@ class building39 extends building
     
     public function instantFinal($player)
     {
-        $nb = self::getUniqueValueFromDB( "select count(*) from debt where player_id = {$this->player_id} and paid = 1");
+        $nb = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB( "select count(*) from debt where player_id = {$this->player_id} and paid = 1");
         $player->gain("building".$this->card_id,null,intdiv($nb,2)*V);
     }
 }

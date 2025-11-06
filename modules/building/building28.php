@@ -9,6 +9,6 @@ class building28 extends building
     
     public function getExtraVP()
     {
-        return -1*self::getUniqueValueFromDB( "select count(*) from debt where player_id = {$this->player_id} and paid = 0");
+        return -1*ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB( "select count(*) from debt where player_id = {$this->player_id} and paid = 0");
     }
 }

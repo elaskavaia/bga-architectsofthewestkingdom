@@ -9,7 +9,7 @@ class building36 extends building
     
     public function instant($player)
     {
-        $players = self::getCollectionFromDb( "select * from player order by player_no desc" );
+        $players = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb( "select * from player order by player_no desc" );
         foreach($players as $player)
         {
             $obj = new ARCPlayer($player['player_id']);
