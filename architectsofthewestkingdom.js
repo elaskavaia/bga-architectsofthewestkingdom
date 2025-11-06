@@ -663,6 +663,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
 		    <b>${name}</b><br/>
 		    <p><b>${_("Ability")}</b>: ${tooltip}</p>
 			<p><b>${_("Skills Requirement")}</b>: ${skill}</p>
+			<p><b>${_("VP")}</b>: ${helpnode.vp}</p>
 		  </div>
 		</div>`;
       this.addTooltipHtml("building" + card["card_id"], html, 1000);

@@ -356,6 +356,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 0,
+          vp: 3,
         },
         2: {
           name: _("Steeple"),
@@ -365,6 +366,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "If the controlling player has advanced work on the Cathedral more than any other player (ties don't count), they gain the reward shown on the right."
           ),
           requirement: 0,
+          vp: 4,
         },
         3: {
           name: _("Stone Market"),
@@ -374,6 +376,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
           requirement: 4,
+          vp: 7,
         },
         4: {
           name: _("Tavern"),
@@ -381,6 +384,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately hires any 1 faceup Apprentice for free."),
           requirement: 1,
+          vp: 6,
         },
         5: {
           name: _("Thieves' Den"),
@@ -388,6 +392,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 4,
+          vp: 8,
         },
         6: {
           name: _("Tiler's Hut"),
@@ -395,6 +400,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player scores 1 additional VP for each hired Apprentice they have with the indicated skill."),
           requirement: 0,
+          vp: 5,
         },
         7: {
           name: _("Trading Post"),
@@ -404,6 +410,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
           requirement: 4,
+          vp: 7,
         },
         8: {
           name: _("Treasury"),
@@ -411,6 +418,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 2,
+          vp: 6,
         },
         9: {
           name: _("University"),
@@ -418,6 +426,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player gains 2 additional VP if they have no unpaid Debts."),
           requirement: 7,
+          vp: 11,
         },
         10: {
           name: _("Watchtower"),
@@ -425,6 +434,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("All players with 3 or more Workers in Prison immediately lose 1 Virtue (including the controlling player)."),
           requirement: 7,
+          vp: 11,
         },
         11: {
           name: _("Well"),
@@ -432,6 +442,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 0,
+          vp: 3,
         },
         12: {
           name: _("Wood Market"),
@@ -441,6 +452,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
           requirement: 1,
+          vp: 7,
         },
         13: {
           name: _("Aqueduct"),
@@ -448,6 +460,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player gains 1 VP for every constructed Buildings."),
           requirement: 0,
+          vp: 3,
         },
         14: {
           name: _("Armoury"),
@@ -457,6 +470,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
           requirement: 5,
+          vp: 9,
         },
         15: {
           name: _("Barracks"),
@@ -466,6 +480,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
           requirement: 7,
+          vp: 10,
         },
         16: {
           name: _("Betting House"),
@@ -473,6 +488,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 0,
+          vp: 7,
         },
         17: {
           name: _("Carpenter's Hut"),
@@ -480,6 +496,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player scores 1 additional VP for each hired Apprentice they have with the indicated skill."),
           requirement: 0,
+          vp: 5,
         },
         18: {
           name: _("Castle"),
@@ -489,6 +506,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
           requirement: 7,
+          vp: 10,
         },
         19: {
           name: _("Chapel"),
@@ -498,6 +516,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "If the controlling player has advanced work on the Cathedral more than any other player (ties don't count), they gain the reward shown on the right."
           ),
           requirement: 1,
+          vp: 6,
         },
         20: {
           name: _("Church"),
@@ -505,6 +524,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player may immediately destroy 1 unpaid Debt they hold."),
           requirement: 0,
+          vp: 5,
         },
         21: {
           name: _("Clay Market"),
@@ -514,6 +534,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
           requirement: 2,
+          vp: 6,
         },
         22: {
           name: _("Clay Pit"),
@@ -521,6 +542,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 0,
+          vp: 3,
         },
         23: {
           name: _("Drafting Room"),
@@ -528,14 +550,16 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 3,
+          vp: 8,
         },
-        24: { name: _("Dungeon"), most: false, per: false, tooltip: _("The controlling player loses 2 Virtue"), requirement: 7 },
+        24: { name: _("Dungeon"), most: false, per: false, tooltip: _("The controlling player loses 2 Virtue"), requirement: 7, vp: 14 },
         25: {
           name: _("Factory"),
           most: false,
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 4,
+          vp: 7,
         },
         26: {
           name: _("Fortress"),
@@ -545,6 +569,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
           requirement: 7,
+          vp: 12,
         },
         27: {
           name: _("Fountain"),
@@ -552,6 +577,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player loses 1 less VP for each unpaid Debt."),
           requirement: 0,
+          vp: 4,
         },
         28: {
           name: _("Gambler's Den"),
@@ -559,6 +585,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player loses 1 additional VP for each unpaid Debt (3 total per unpaid Debt)."),
           requirement: 3,
+          vp: 10,
         },
         29: {
           name: _("Hideout"),
@@ -568,6 +595,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player immediately takes the action shown, in the same manner as it would be taken at the Town Centre or Guardhouse."
           ),
           requirement: 5,
+          vp: 8,
         },
         30: {
           name: _("Keep"),
@@ -575,6 +603,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player gains 1 VP for every 3 Captured Workers."),
           requirement: 7,
+          vp: 12,
         },
         31: {
           name: _("Library"),
@@ -582,6 +611,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player may immediately discard 1 chosen Building Card from their hand to gain 2 Gold."),
           requirement: 3,
+          vp: 8,
         },
         32: {
           name: _("Lighthouse"),
@@ -589,6 +619,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player gains 1 VP for every 4 Virtues."),
           requirement: 2,
+          vp: 6,
         },
         33: {
           name: _("Lumber Camp"),
@@ -596,6 +627,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("The controlling player immediately gains the resources or cards shown."),
           requirement: 0,
+          vp: 3,
         },
         34: {
           name: _("Mason's Hut"),
@@ -603,6 +635,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player scores 1 additional VP for each hired Apprentice they have with the indicated skill."),
           requirement: 0,
+          vp: 5,
         },
         35: {
           name: _("Moneylender"),
@@ -610,6 +643,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player gains 1 VP for every 1 paid Debts."),
           requirement: 4,
+          vp: 5,
         },
         36: {
           name: _("Monument"),
@@ -617,6 +651,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("All players immediately gain 1 Virtue. (Note that the controlling player will gain a total of 2 Virtue)."),
           requirement: 6,
+          vp: 9,
         },
         37: {
           name: _("Observatory"),
@@ -626,6 +661,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
           requirement: 1,
+          vp: 7,
         },
         38: {
           name: _("Palace"),
@@ -633,6 +669,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("The controlling player immediately gains 1 Gold for every 4 Virtue they currently have."),
           requirement: 6,
+          vp: 9,
         },
         39: {
           name: _("Reservoir"),
@@ -642,6 +679,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 1 Virtue (before scoring) for each item or resource shown on the right, that they hold."
           ),
           requirement: 0,
+          vp: 4,
         },
         40: {
           name: _("Silver Market"),
@@ -651,6 +689,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "The controlling player gains 2 additional VP if they have more of the resource shown on the left than any other player (ties don't count)."
           ),
           requirement: 2,
+          vp: 6,
         },
         41: {
           name: _("Crane"),
@@ -660,6 +699,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
             "Immediately place another Worker in the Guildhall to either construct another Building or advance work on the Cathedral."
           ),
           requirement: 0,
+          vp: 3,
         },
         42: {
           name: _("Graveyard"),
@@ -667,6 +707,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: false,
           tooltip: _("Immediately discard 1 of your hired Apprentices."),
           requirement: 7,
+          vp: 12,
         },
         43: {
           name: _("Museum"),
@@ -674,6 +715,7 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
           per: true,
           tooltip: _("Gain 1 Virtue at the end of the game for every 2 Buildings you have constructed."),
           requirement: 0,
+          vp: 4,
         },
       };
 
