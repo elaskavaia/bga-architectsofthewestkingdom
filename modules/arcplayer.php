@@ -27,7 +27,7 @@ class ARCPlayer
         $this->type = $p['type'];
         $this->virtue = $p['virtue'];
         $this->cathedral = $p['cathedral'];
-        $this->resources = array();
+        $this->resources = [];
         for ($i = 1; $i <= 6; $i++) {
             $this->resources[$i] = $p['res' . $i];;
         }
@@ -39,11 +39,11 @@ class ARCPlayer
      * @param mixed $parg1 Parameter 1
      * @param mixed $parg2 Parameter 2
      */
-    function argconfirmation($parg1, $parg2)
+    function argconfirmation($parg1 = null, $parg2 = null)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must confirm their action');
         $ret['titleyou'] = clienttranslate('${you} must confirm your action');
 
@@ -54,11 +54,11 @@ class ARCPlayer
         }
 
         $ret['buttons'][] = 'Confirm';
-        $ret['selectable']['Confirm'] = array();
+        $this->setSelectable($ret, 'Confirm', true, '');
 
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $this->setSelectable($ret, 'Undo', true, '');
         }
         return $ret;
     }
@@ -75,7 +75,21 @@ class ARCPlayer
      * @param mixed $varg1 Value argument 1
      * @param mixed $varg2 Value argument 2
      */
-    function confirmation($parg1, $parg2, $varg1, $varg2) {}
+    function confirmation($parg1, $parg2, $varg1, $varg2)
+    {
+        // do nothing
+    }
+
+
+    function setSelectable(array &$result, string $key, bool $check, string $err)
+    {
+        if ($check) {
+            $result['selectable'][$key] = [];
+        } else {
+            if (!$err) $err = clienttranslate("Not available");
+            $result['selectable'][$key] = ['err' => $err];
+        }
+    }
 
     /**
      * Prepares available actions for the action round phase
@@ -84,90 +98,96 @@ class ARCPlayer
      */
     function argactionRound($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['unselectable'] = array();
-        $ret['buttons'] = array();
+        $player_id = $this->player_id;
+        $game = ArchitectsOfTheWestKingdom::$instance;
+        $ret = [];
+        $ret['selectable'] = [];
+
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must play a worker');
         $ret['titleyou'] = clienttranslate('${you} must play a worker');
 
         foreach (['quarry', 'forest', 'silversmith', 'mines1', 'storehouse', "workshop1", "workshop2"] as $action) {
             $index = (int) filter_var($action, FILTER_SANITIZE_NUMBER_INT);
             $act = str_replace($index, "", $action);
-            if ($this->checkCost($this->getCost($act, $index))) {
-                $ret['selectable']["act" . $action] = array();
-            }
+            $this->setSelectable($ret, "act" . $action, $this->checkCost($this->getCost($act, $index)), clienttranslate('Not enough coins'));
         }
+
+
 
         $argguildhall = $this->argguildhall($parg1, $parg2);
-        if (!$argguildhall['void']) {
-            $ret['selectable']["actguildhall"] = $argguildhall;
-        } else {
-            $ret['unselectable']["actguildhall"] = $argguildhall;
-        }
+        $ret['selectable']["actguildhall"] = [
+            'selectable' => $argguildhall['selectable'],
+            'err' => $argguildhall['err']
+        ];
 
+        $this->setSelectable(
+            $ret,
+            "acttowncenter",
+            $this->checkCost($this->getCost("towncenter", 1)),
+            clienttranslate('Not enough coins')
+        );
 
-        if ($this->checkCost($this->getCost("towncenter", 1))) {
-            $ret['selectable']["acttowncenter"] = array();
-        } else {
-            $ret['unselectable']["acttowncenter"] = clienttranslate('Not enough coins');
-        }
+        $this->setSelectable(
+            $ret,
+            "acttaxstand",
+            $game->getGameStateValue('tax') > 0,
+            clienttranslate('No tax coins to collect')
+        );
 
-        if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('tax') > 0) {
-            $ret['selectable']["acttaxstand"] = array();
-        } else {
-            $ret['unselectable']["acttaxstand"] = clienttranslate('No tax coins to collect');
-        }
+        $this->setSelectable(
+            $ret,
+            "actguardhouse1",
+            $game->getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$player_id}'") > 0,
+            clienttranslate('No workers in your dungeon')
+        );
 
-        if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$this->player_id}'") > 0) {
-            $ret['selectable']["actguardhouse1"] = array();
-        } else {
-            $ret['unselectable']["actguardhouse1"] = clienttranslate('No workers in your dungeon');
-        }
+        $this->setSelectable(
+            $ret,
+            "actguardhouse2",
+            $game->getUniqueValueFromDB("select count(*) from worker where location = 'prison' and player_id={$player_id}") > 0,
+            clienttranslate('No workers in the prison')
+        );
 
-        if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison' and player_id={$this->player_id}") > 0) {
-            $ret['selectable']["actguardhouse2"] = array();
-        } else {
-            $ret['unselectable']["actguardhouse2"] = clienttranslate('No workers in the prison');
-        }
+        $this->setSelectable(
+            $ret,
+            "actguardhouse3",
+            $game->getUniqueValueFromDB("select count(*) from worker where location like 'prison_%' and player_id={$player_id}") > 0,
+            clienttranslate('No your workers in other players\' dungeons')
+        );
 
-        if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location like 'prison_%' and player_id={$this->player_id}") > 0) {
-            $ret['selectable']["actguardhouse3"] = array();
-        } else {
-            $ret['unselectable']["actguardhouse3"] = clienttranslate('No your workers in other players\' dungeons');
-        }
+        $hasDebt = $game->getUniqueValueFromDB("select count(*) from debt where paid = 0 and player_id={$player_id}") > 0;
+        $this->setSelectable(
+            $ret,
+            "actguardhouse4",
+            $hasDebt && $this->checkCost($this->getCost("guardhouse", 4)),
+            $hasDebt ? clienttranslate('Not enough resources to pay off debt') : clienttranslate('No outstanding debts')
+        );
 
-        if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from debt where paid = 0 and player_id={$this->player_id}") > 0) {
-            if ($this->checkCost($this->getCost("guardhouse", 4))) {
-                $ret['selectable']["actguardhouse4"] = array();
+        $this->setSelectable(
+            $ret,
+            "actmines2",
+            $game->getUniqueValueFromDB("select count(*) from worker where location='mines' and player_id={$player_id}") > 0,
+            clienttranslate('At least 2 workers required to mine gold')
+        );
+
+        $virtueOk = $this->virtue < 10;
+        $markets = ["blackmarketa", "blackmarketb1", "blackmarketb2", "blackmarketc"];
+        foreach ($markets as $marketx) {
+            $actmarket = "act$marketx";
+            $market = preg_replace('/\d+/', "", $marketx);
+            if (!$virtueOk) {
+                $this->setSelectable($ret, $actmarket, false, clienttranslate('Virtue too high to access the Black Market'));
+            } else if (!$this->checkCost($this->getCost($market))) {
+                $this->setSelectable($ret, $actmarket, false, clienttranslate('Not enough coins'));
+            } else if (!($game->getUniqueValueFromDB("select count(*) from worker where location='$market'") == 0)) {
+                $this->setSelectable($ret, $actmarket, false, clienttranslate('Another worker is already present at this location'));
             } else {
-                $ret['unselectable']["actguardhouse4"] = clienttranslate('Not enough resources to pay off debt');
+                $this->setSelectable($ret, $actmarket, true, '');
             }
-        } else {
-            $ret['unselectable']["actguardhouse4"] = clienttranslate('No outstanding debts');
         }
 
-        if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location='mines' and player_id={$this->player_id}") > 0) {
-            $ret['selectable']["actmines2"] = array();
-        }
 
-        if ($this->virtue < 10) {
-            if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location='blackmarketa'") == 0 && $this->checkCost($this->getCost("blackmarketa"))) {
-                $ret['selectable']["actblackmarketa"] = array();
-            }
-            if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location='blackmarketb'") == 0 && $this->checkCost($this->getCost("blackmarketb"))) {
-                $ret['selectable']["actblackmarketb1"] = array();
-                $ret['selectable']["actblackmarketb2"] = array();
-            }
-            if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location='blackmarketc'") == 0 && $this->checkCost($this->getCost("blackmarketc"))) {
-                $ret['selectable']["actblackmarketc"] = array();
-            }
-        } else {
-            $ret['unselectable']["actblackmarketa"] = clienttranslate('Virtue too high to access the Black Market');
-            $ret['unselectable']["actblackmarketb1"] = clienttranslate('Virtue too high to access the Black Market');
-            $ret['unselectable']["actblackmarketb2"] = clienttranslate('Virtue too high to access the Black Market');
-            $ret['unselectable']["actblackmarketc"] = clienttranslate('Virtue too high to access the Black Market');
-        }
 
         return $ret;
     }
@@ -181,24 +201,28 @@ class ARCPlayer
      */
     function actionRound($parg1, $parg2, $varg1, $varg2)
     {
-        ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "confirmation");
-        ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "discardBuilding");
+        $player_id = $this->player_id;
+        $game = ArchitectsOfTheWestKingdom::$instance;
+        $confirmTurn = ($game->userPreferences->get($player_id, 101) ?? 1) != 0;
+        if ($confirmTurn)
+            $game->addPending($this->player_id, "confirmation");
+        $game->addPending($this->player_id, "discardBuilding");
 
         $index = (int) filter_var($varg1, FILTER_SANITIZE_NUMBER_INT);
         $action = str_replace($index, "", substr($varg1, 3));
 
-        $worker_id = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select min(id) from worker where player_id = {$this->player_id} and location like 'reserve%'");
-        ArchitectsOfTheWestKingdom::$instance->DbQuery("update worker set location = '{$action}', location_arg=0 where id = {$worker_id}");
+        $worker_id = $game->getUniqueValueFromDB("select min(id) from worker where player_id = {$this->player_id} and location like 'reserve%'");
+        $game->DbQuery("update worker set location = '{$action}', location_arg=0 where id = {$worker_id}");
 
-        $worker = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM worker WHERE id = {$worker_id}");
-        ArchitectsOfTheWestKingdom::$instance->notify->all("move", '', array(
+        $worker = $game->getObjectFromDB("SELECT * FROM worker WHERE id = {$worker_id}");
+        $game->notify->all("move", '', array(
             'mobile' => "worker_" . $worker['id'],
             'parent' => $worker['location'],
             'position' => 'last'
         ));
 
-        $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
-        ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} places a worker on ${location}'), array(
+        $nbmeeplesLeft = $game->getUniqueValueFromDB("select count(*) from worker where player_id = {$this->player_id} and  location like 'reserve%'");
+        $game->notify->all("counter", clienttranslate('${player_name} places a worker on ${location}'), array(
             'player_id' => $this->player_id,
             'player_name' => $this->player_name,
             'id' => "res_" . $this->player_id . "_8",
@@ -206,13 +230,13 @@ class ARCPlayer
             'location' => $action
         ));
 
-        $nbmeeplesOnLocation = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*)  from worker where player_id = {$this->player_id} and location = '{$action}'");
+        $nbmeeplesOnLocation = $game->getUniqueValueFromDB("select count(*)  from worker where player_id = {$this->player_id} and location = '{$action}'");
 
         $this->pay(null, $varg1, $this->getCost($action, $index));
 
         switch ($action) {
             case "guardhouse":
-                ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "addguardhouse", $nbmeeplesOnLocation - 1);
+                $game->addPending($this->player_id, "addguardhouse", $nbmeeplesOnLocation - 1);
                 switch ($index) {
                     case 1:
                         $this->guardhouse1();
@@ -221,7 +245,7 @@ class ARCPlayer
                         $this->guardhouse2();
                         break;
                     case 3:
-                        ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "guardhouse3");
+                        $game->addPending($this->player_id, "guardhouse3");
                         break;
                     case 4:
                         $this->debtRefund();
@@ -230,33 +254,33 @@ class ARCPlayer
                 break;
             case "workshop":
                 if ($index == 1) {
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "workshop", min($nbmeeplesOnLocation, 4));
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "discardApprentice");
+                    $game->addPending($this->player_id, "workshop", min($nbmeeplesOnLocation, 4));
+                    $game->addPending($this->player_id, "discardApprentice");
                 } else {
                     $nbcards = intdiv($nbmeeplesOnLocation, 2) + 1;
-                    $cards = ArchitectsOfTheWestKingdom::$instance->buildings->pickCardsForLocation($nbcards, 'deck', 'hand' . $this->player_id);
+                    $cards = $game->buildings->pickCardsForLocation($nbcards, 'deck', 'hand' . $this->player_id);
                     foreach ($cards as $card_id => $card) {
-                        $building = ArchitectsOfTheWestKingdom::$instance->getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
-                        ArchitectsOfTheWestKingdom::$instance->notify->player($this->player_id, "newbuilding", '', array(
+                        $building = $game->getObjectFromDB("SELECT * FROM building WHERE card_id = {$card['id']}");
+                        $game->notify->player($this->player_id, "newbuilding", '', array(
                             'card' => $building
                         ));
                     }
-                    ArchitectsOfTheWestKingdom::$instance->notify->all("counter", clienttranslate('${player_name} gains ${nbdiff} <div class="arcicon res9"></div>'), array(
+                    $game->notify->all("counter", clienttranslate('${player_name} gains ${nbdiff} <div class="arcicon res9"></div>'), array(
                         'player_id' => $this->player_id,
                         'player_name' => $this->player_name,
                         'id' => "res_" . $this->player_id . "_7",
-                        'nb' => ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$this->player_id}'"),
+                        'nb' => $game->getUniqueValueFromDB("select count(*) from building where card_location = 'hand{$this->player_id}'"),
                         'nbdiff' => $nbcards
                     ));
-                    ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
+                    $game->setGameStateValue('no_undo', 1);
                 }
                 break;
             case "storehouse":
-                if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*)  from apprentice where card_location = 'cards{$this->player_id}' and card_type = 42") > 0) {
+                if ($game->getUniqueValueFromDB("select count(*)  from apprentice where card_location = 'cards{$this->player_id}' and card_type = 42") > 0) {
                     $nbmeeplesOnLocation++;
                 }
 
-                ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "storehouse", $nbmeeplesOnLocation);
+                $game->addPending($this->player_id, "storehouse", $nbmeeplesOnLocation);
                 break;
             case "mines":
                 $bonus = $this->getAdditionalBonus("mines");
@@ -272,9 +296,9 @@ class ARCPlayer
                 $this->gainDirect($nbmeeplesOnLocation + $bonus, STONE, $varg1);
                 break;
             case "taxstand":
-                $tax = ArchitectsOfTheWestKingdom::$instance->getGameStateValue('tax');
-                ArchitectsOfTheWestKingdom::$instance->setGameStateValue('tax', 0);
-                ArchitectsOfTheWestKingdom::$instance->notify->all("counterid", '', array(
+                $tax = $game->getGameStateValue('tax');
+                $game->setGameStateValue('tax', 0);
+                $game->notify->all("counterid", '', array(
                     'id' => "taxcpt",
                     'nb' => 0
                 ));
@@ -296,19 +320,19 @@ class ARCPlayer
                 $this->gainDirect($nbmeeplesOnLocation + 1 + $bonus, SILVER, $varg1);
                 break;
             case "towncenter":
-                ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "towncenter", null, null, 0, $nbmeeplesOnLocation);
+                $game->addPending($this->player_id, "towncenter", null, null, 0, $nbmeeplesOnLocation);
                 break;
             case "guildhall":
                 $this->guildhallSelect($worker_id);
                 break;
             case "blackmarketa":
-                $nbplayers = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location like 'blackmarket%'");
+                $nbplayers = $game->getUniqueValueFromDB("select count(*) from worker where location like 'blackmarket%'");
                 if ($nbplayers == 3) {
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "blackmarketreset");
+                    $game->addPending($this->player_id, "blackmarketreset");
                 }
                 $gain = M + G;
-                if (ArchitectsOfTheWestKingdom::$instance->blackmarkets->getCardOnTop("deck") != null) {
-                    $gain = ArchitectsOfTheWestKingdom::$instance->blackmarket1[ArchitectsOfTheWestKingdom::$instance->blackmarkets->getCardOnTop("deck")['type']];
+                if ($game->blackmarkets->getCardOnTop("deck") != null) {
+                    $gain = $game->blackmarket1[$game->blackmarkets->getCardOnTop("deck")['type']];
                 }
                 $bonus = $this->getAdditionalBonus($action);
                 $this->gain($varg1, null, $gain + $bonus);
@@ -319,17 +343,17 @@ class ARCPlayer
 
                 break;
             case "blackmarketb":
-                $nbplayers = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location like 'blackmarket%'");
+                $nbplayers = $game->getUniqueValueFromDB("select count(*) from worker where location like 'blackmarket%'");
                 if ($nbplayers == 3) {
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "blackmarketreset");
+                    $game->addPending($this->player_id, "blackmarketreset");
                 }
                 if ($index == 1) {
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "pickApprentice");
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "discardApprentice");
+                    $game->addPending($this->player_id, "pickApprentice");
+                    $game->addPending($this->player_id, "discardApprentice");
                 } else {
-                    ArchitectsOfTheWestKingdom::$instance->setGameStateValue('no_undo', 1);
-                    ArchitectsOfTheWestKingdom::$instance->buildings->pickCardsForLocation(5, 'deck', "selectCards{$this->player_id}");
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "selectBuilding", "flush");
+                    $game->setGameStateValue('no_undo', 1);
+                    $game->buildings->pickCardsForLocation(5, 'deck', "selectCards{$this->player_id}");
+                    $game->addPending($this->player_id, "selectBuilding", "flush");
                 }
                 $bonus = $this->getAdditionalBonus($action);
                 $this->gain($varg1, null, $bonus);
@@ -338,14 +362,14 @@ class ARCPlayer
                 }
                 break;
             case "blackmarketc":
-                $nbplayers = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location like 'blackmarket%'");
+                $nbplayers = $game->getUniqueValueFromDB("select count(*) from worker where location like 'blackmarket%'");
                 if ($nbplayers == 3) {
-                    ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "blackmarketreset");
+                    $game->addPending($this->player_id, "blackmarketreset");
                 }
 
                 $gain = 2 * M + S + W;
-                if (ArchitectsOfTheWestKingdom::$instance->blackmarkets->getCardOnTop("discard") != null) {
-                    $gain = ArchitectsOfTheWestKingdom::$instance->blackmarket2[ArchitectsOfTheWestKingdom::$instance->blackmarkets->getCardOnTop("discard")['type']];
+                if ($game->blackmarkets->getCardOnTop("discard") != null) {
+                    $gain = $game->blackmarket2[$game->blackmarkets->getCardOnTop("discard")['type']];
                 }
                 $bonus = $this->getAdditionalBonus($action);
                 $this->gain($varg1, null, $gain + $bonus);
@@ -434,9 +458,9 @@ class ARCPlayer
      */
     function argaddguardhouse($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may use additional guardhouse actions (#nb# left)');
         $ret['titleyou'] = clienttranslate('${you} may use additional guardhouse actions (#nb# left)');
         $ret['nb'] = $parg1;
@@ -445,27 +469,27 @@ class ARCPlayer
 
         if ($number > 0) {
             if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$this->player_id}'") > 0) {
-                $ret['selectable']["actguardhouse1"] = array();
+                $ret['selectable']["actguardhouse1"] = [];
             }
 
             if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison' and player_id={$this->player_id}") > 0) {
-                $ret['selectable']["actguardhouse2"] = array();
+                $ret['selectable']["actguardhouse2"] = [];
             }
 
             if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location like 'prison_%' and player_id={$this->player_id}") > 0) {
-                $ret['selectable']["actguardhouse3"] = array();
+                $ret['selectable']["actguardhouse3"] = [];
             }
 
             if ($this->checkCost($this->getCost("guardhouse", 4)) && ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from debt where paid = 0 and player_id={$this->player_id}") > 0) {
-                $ret['selectable']["actguardhouse4"] = array();
+                $ret['selectable']["actguardhouse4"] = [];
             }
         }
         $ret['buttons'][] = 'Skip';
-        $ret['selectable']['Skip'] = array();
+        $ret['selectable']['Skip'] = [];
 
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
         return $ret;
@@ -506,26 +530,26 @@ class ARCPlayer
      */
     function argguardhouse3()
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may release their workers from other players\' Boards');
         $ret['titleyou'] = clienttranslate('${you} may release your workers from other players\' Boards');
 
         $cost = $this->getCost("guardhouseb");
         if ($this->checkCost($cost)) {
             $ret['buttons'][] = 'res' . $cost;
-            $ret['selectable']['res' . $cost] = array();
+            $ret['selectable']['res' . $cost] = [];
         }
         $ret['buttons'][] = 'resgh3';
-        $ret['selectable']['resgh3'] = array();
+        $ret['selectable']['resgh3'] = [];
 
         $ret['buttons'][] = 'Skip';
-        $ret['selectable']['Skip'] = array();
+        $ret['selectable']['Skip'] = [];
 
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
 
@@ -693,7 +717,7 @@ class ARCPlayer
         ));
 
         //Step 3 activate blackmarketreset abilities
-        $arr = array();
+        $arr = [];
         $players = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb("select * from player order by player_no desc");
         foreach ($players as $player) {
             $obj = new ARCPlayer($player['player_id']);
@@ -706,8 +730,8 @@ class ARCPlayer
 
         //Step 4
         $max = 0;
-        $arr = array();
-        $arrnames = array();
+        $arr = [];
+        $arrnames = [];
         foreach ($players as $player) {
             $nbmeeplesLeft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where player_id = {$player['player_id']} and  location = 'prison'");
             if ($nbmeeplesLeft >= 3) {
@@ -716,8 +740,8 @@ class ARCPlayer
             }
             if ($nbmeeplesLeft > $max) {
                 $max = $nbmeeplesLeft;
-                $arr = array();
-                $arrnames = array();
+                $arr = [];
+                $arrnames = [];
             }
             if ($nbmeeplesLeft == $max) {
                 $arr[] = $player;
@@ -772,10 +796,10 @@ class ARCPlayer
      */
     function argguildhall($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['unselectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may construct a Building or work on the Cathedral');
         $ret['titleyou'] = clienttranslate('${you} may construct a Building or work on the Cathedral');
 
@@ -783,40 +807,45 @@ class ARCPlayer
         $buildings = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb($sql);
         $appreq = $this->getAppRequirement();
 
+        $canbuild = false;
+
         foreach ($buildings as $building) {
             $objbuilding = building::instantiate($building);
+            $building_id = "building" . $building['card_id'];
             if (($appreq & $objbuilding->requirement) == $objbuilding->requirement) {
                 if ($this->type == 0) {
                     if ($this->checkCost($this->minusCost($objbuilding->cost, W)) || $this->checkCost($this->minusCost($objbuilding->cost, S))) {
-                        $ret['selectable']["building" . $building['card_id']] = array();
+                        $ret['selectable'][$building_id] = [];
+                        $canbuild = true;
                     } else {
-                        $ret['unselectable']["building" . $building['card_id']] = clienttranslate('Not enough resources');
+                        $ret['selectable'][$building_id] = clienttranslate('Not enough resources');
                     }
                 } else if ($this->checkCost($objbuilding->cost)) {
-                    $ret['selectable']["building" . $building['card_id']] = array();
+                    $ret['selectable'][$building_id] = [];
+                    $canbuild = true;
                 } else {
-                    $ret['unselectable']["building" . $building['card_id']] = clienttranslate('Not enough resources');
+                    $ret['selectable'][$building_id] = clienttranslate('Not enough resources');
                 }
             } else {
-                $ret['unselectable']["building" . $building['card_id']] = clienttranslate('Not enough skills');
+                $ret['selectable'][$building_id] = clienttranslate('Not enough skills');
             }
         }
         if ($this->cathedral >= 5) {
-            $ret['unselectable']['actcathedral'] = clienttranslate('Cathedral is already completed');
+            $ret['selectable']['actcathedral'] = clienttranslate('Cathedral is already completed');
         } else   if ($this->virtue <= 4) {
-            $ret['unselectable']['actcathedral'] = clienttranslate('Virtue is too low to work on the Cathedral');
+            $ret['selectable']['actcathedral'] = clienttranslate('Virtue is too low to work on the Cathedral');
         } else {
             $spotFilled = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from player where cathedral = 1+ {$this->cathedral}");
             $spotstot = ArchitectsOfTheWestKingdom::$instance->cathedralSpots[$this->cathedral + 1];
 
             if (count($buildings) == 0 && $this->type != 6) {
-                $ret['unselectable']['actcathedral'] = clienttranslate('You don\'t have a building to discard to work on cathedral');
+                $ret['selectable']['actcathedral'] = clienttranslate('You don\'t have a building to discard to work on cathedral');
             } else  if ($spotFilled >= $spotstot) {
-                $ret['unselectable']['actcathedral'] = clienttranslate('All spots in Cathedral are filled');
+                $ret['selectable']['actcathedral'] = clienttranslate('All spots in Cathedral are filled');
             } else {
                 $costs = ArchitectsOfTheWestKingdom::$instance->cathedralCosts[$this->cathedral + 1];
                 if ($this->type == 0) {
-                    $reducs = array();
+                    $reducs = [];
                     foreach ($costs as $cost) {
                         $reducs[] = $this->minusCost($cost, W);
                         $reducs[] = $this->minusCost($cost, S);
@@ -824,22 +853,25 @@ class ARCPlayer
                     $costs = array_unique($reducs);
                 }
                 if (count($this->filterCosts($costs)) > 0) {
-                    $ret['selectable']['actcathedral'] = array();
+                    $ret['selectable']['actcathedral'] = [];
+                    $canbuild = true;
                 } else {
-                    $ret['unselectable']['actcathedral'] = clienttranslate('Not enough resources');
+                    $ret['selectable']['actcathedral'] = clienttranslate('Not enough resources');
                 }
             }
         }
 
-        $ret['void'] = count($ret['selectable']) == 0;
+
+        if (!$canbuild) {
+            $ret['err'] = clienttranslate("Cannot build neither Cathedral nor any Buildings");
+        } else {
+            $ret['err'] = '';
+        }
 
         //undo is always available here
 
         $ret['buttons'][] = 'Undo';
-        $ret['selectable']['Undo'] = array();
-
-
-
+        $ret['selectable']['Undo'] = [];
 
         return $ret;
     }
@@ -857,7 +889,7 @@ class ARCPlayer
             if ($varg1 == "actcathedral") {
                 $costs = ArchitectsOfTheWestKingdom::$instance->cathedralCosts[$this->cathedral + 1];
                 if ($this->type == 0) {
-                    $reducs = array();
+                    $reducs = [];
                     foreach ($costs as $cost) {
                         $reducs[] = $this->minusCost($cost, W);
                         $reducs[] = $this->minusCost($cost, S);
@@ -904,7 +936,7 @@ class ARCPlayer
                 }
 
                 if ($this->type == 0) {
-                    $costs = array();
+                    $costs = [];
                     $costs[] = $this->minusCost($objbuilding->cost, S);
                     $costs[] = $this->minusCost($objbuilding->cost, W);
                     ArchitectsOfTheWestKingdom::$instance->addPending($this->player_id, "pay", json_encode($this->filterCosts($costs)), "actcathedral");
@@ -970,9 +1002,9 @@ class ARCPlayer
      */
     function argnoworker($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must return one worker');
         $ret['titleyou'] = clienttranslate('${you} must return one worker');
 
@@ -985,7 +1017,7 @@ class ARCPlayer
             }
 
             foreach ($workers as $worker) {
-                $ret['selectable']['worker_' . $worker['id']] = array();
+                $ret['selectable']['worker_' . $worker['id']] = [];
             }
         }
 
@@ -1046,9 +1078,9 @@ class ARCPlayer
      */
     function argtowncenter($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may capture workers (#nb#/#nb2#))');
         $ret['titleyou'] = clienttranslate('${you} may capture workers (#nb#/#nb2#)');
 
@@ -1078,17 +1110,17 @@ class ARCPlayer
             $workers = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb("select * from worker where location not like 'reserve%'  and location not like 'blackmarket%' and location not like 'prison%' and location <> 'guildhall'");
             foreach ($workers as $worker) {
                 if ($allowAdditional || $worker['location'] == $parg1 || $worker['location'] == $parg2) {
-                    $ret['selectable']['worker_' . $worker['id']] = array();
+                    $ret['selectable']['worker_' . $worker['id']] = [];
                 }
             }
         }
 
         $ret['buttons'][] = 'Skip';
-        $ret['selectable']['Skip'] = array();
+        $ret['selectable']['Skip'] = [];
 
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
         return $ret;
@@ -1173,9 +1205,9 @@ class ARCPlayer
      */
     function argworkshop($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose an apprentice up to column #nb# or pay extra silver');
         $ret['titleyou'] = clienttranslate('${you} must choose an apprentice up to column #nb# or pay extra silver');
         $ret['nb'] = $parg1;
@@ -1196,13 +1228,13 @@ class ARCPlayer
             foreach ($apprentices as $apprentice) {
                 $column = intdiv((int) filter_var($apprentice['card_location'], FILTER_SANITIZE_NUMBER_INT) + 1, 2);
                 if ($column <= $nbmax) {
-                    $ret['selectable']['apprentice' . $apprentice['card_id']] = array();
+                    $ret['selectable']['apprentice' . $apprentice['card_id']] = [];
                 }
             }
         }
 
         $ret['buttons'][] = 'Undo';
-        $ret['selectable']['Undo'] = array();
+        $ret['selectable']['Undo'] = [];
 
         return $ret;
     }
@@ -1250,9 +1282,9 @@ class ARCPlayer
      */
     function argdiscardBuilding($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         if ($parg1 == "unique") {
             $ret['title'] = clienttranslate('${actplayer} must discard one building');
             $ret['titleyou'] = clienttranslate('${you} must discard one building');
@@ -1266,16 +1298,16 @@ class ARCPlayer
 
         if (count($buildings) > 6 || $parg1 == "unique") {
             foreach ($buildings as $building) {
-                $ret['selectable']["building" . $building['card_id']] = array();
+                $ret['selectable']["building" . $building['card_id']] = [];
             }
         } else {
             $ret['buttons'][] = 'Skip';
-            $ret['selectable']['Skip'] = array();
+            $ret['selectable']['Skip'] = [];
         }
 
         if ($this->isUndoAvailable() && $parg1 == "unique") {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
 
@@ -1323,9 +1355,9 @@ class ARCPlayer
      */
     function argdiscardApprentice($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may discard an apprentice');
         $ret['titleyou'] = clienttranslate('${you} may discard an apprentice');
 
@@ -1339,16 +1371,16 @@ class ARCPlayer
 
         if (count($apprentices) >= $max || $parg1 == "noskip") {
             foreach ($apprentices as $apprentice) {
-                $ret['selectable']["apprentice" . $apprentice['card_id']] = array();
+                $ret['selectable']["apprentice" . $apprentice['card_id']] = [];
             }
             if ($this->isUndoAvailable()) {
                 $ret['buttons'][] = 'Undo';
-                $ret['selectable']['Undo'] = array();
+                $ret['selectable']['Undo'] = [];
             }
         } else {
 
             $ret['buttons'][] = 'Skip';
-            $ret['selectable']['Skip'] = array();
+            $ret['selectable']['Skip'] = [];
         }
 
 
@@ -1388,9 +1420,9 @@ class ARCPlayer
      */
     function argstorehouse($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose a trade (#nb# left)');
         $ret['titleyou'] = clienttranslate('${you} must choose a trade (#nb# left)');
         $ret['storehouse'] = true;
@@ -1399,13 +1431,13 @@ class ARCPlayer
         $filtered = $this->filterCosts([2 * S, 2 * W, 2 * C, W + S, C + S, C + W]);
         foreach ($filtered as $cost) {
             $ret['buttons'][] = 'res' . $cost . "to" . V;
-            $ret['selectable']['res' . $cost . "to" . V] = array();
+            $ret['selectable']['res' . $cost . "to" . V] = [];
         }
 
         $filtered = $this->filterCosts([3 * S, 2 * S + W, S + 2 * W, 3 * W]);
         foreach ($filtered as $cost) {
             $ret['buttons'][] = 'res' . $cost . "to" . M;
-            $ret['selectable']['res' . $cost . "to" . M] = array();
+            $ret['selectable']['res' . $cost . "to" . M] = [];
         }
 
         $sql = "SELECT * from apprentice where card_location = 'cards{$this->player_id}'";
@@ -1415,7 +1447,7 @@ class ARCPlayer
             foreach ($bobj->getAdditionalStorehouse() as $cost => $gain) {
                 if ($this->checkCost($cost)) {
                     $ret['buttons'][] = 'res' . $cost . "to" . $gain;
-                    $ret['selectable']['res' . $cost . "to" . $gain] = array();
+                    $ret['selectable']['res' . $cost . "to" . $gain] = [];
                 }
             }
         }
@@ -1449,12 +1481,12 @@ class ARCPlayer
 
 
         $ret['buttons'][] = 'Skip';
-        $ret['selectable']['Skip'] = array();
+        $ret['selectable']['Skip'] = [];
 
 
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
         return $ret;
@@ -1489,9 +1521,9 @@ class ARCPlayer
      */
     function argselectBuilding($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must keep one building');
         $ret['titleyou'] = clienttranslate('${you} must keep one building');
 
@@ -1500,12 +1532,12 @@ class ARCPlayer
         $ret['selectCards'] = $buildings;
 
         foreach ($buildings as $building) {
-            $ret['selectable']["building" . $building['card_id']] = array();
+            $ret['selectable']["building" . $building['card_id']] = [];
         }
 
         if ($this->isUndoAvailable() && $parg1 == "flush") {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
 
@@ -1550,9 +1582,9 @@ class ARCPlayer
      */
     function argpickApprentice($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must hire an apprentice');
         $ret['titleyou'] = clienttranslate('${you} must hire an apprentice');
 
@@ -1569,16 +1601,16 @@ class ARCPlayer
             $apprentices = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb($sql);
 
             foreach ($apprentices as $apprentice) {
-                $ret['selectable']["apprentice" . $apprentice['card_id']] = array();
+                $ret['selectable']["apprentice" . $apprentice['card_id']] = [];
             }
         }
         if ($parg1 != "norefill") {
             $ret['buttons'][] = 'Skip';
-            $ret['selectable']['Skip'] = array();
+            $ret['selectable']['Skip'] = [];
 
             if ($this->isUndoAvailable()) {
                 $ret['buttons'][] = 'Undo';
-                $ret['selectable']['Undo'] = array();
+                $ret['selectable']['Undo'] = [];
             }
         }
 
@@ -1718,20 +1750,20 @@ class ARCPlayer
      */
     function arggain($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose what to gain');
         $ret['titleyou'] = clienttranslate('${you} must choose what to gain');
 
         foreach (json_decode($parg2) as $id => $cost) {
             $ret['buttons'][] = 'res' . $cost;
-            $ret['selectable']['res' . $cost] = array();
+            $ret['selectable']['res' . $cost] = [];
         }
 
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
 
 
@@ -1924,15 +1956,15 @@ class ARCPlayer
      */
     function argpay($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose how to pay');
         $ret['titleyou'] = clienttranslate('${you} must choose how to pay');
 
         foreach (json_decode($parg1) as $id => $cost) {
             $ret['buttons'][] = 'res' . $cost;
-            $ret['selectable']['res' . $cost] = array();
+            $ret['selectable']['res' . $cost] = [];
         }
 
         return $ret;
@@ -2067,21 +2099,21 @@ class ARCPlayer
      */
     function arghugo($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may spend ${cost} to avoid one debt');
         $ret['titleyou'] = clienttranslate('${you} may spend ${cost} to avoid one debt');
         $ret['cost'] = 2 * SI;
         if ($this->resources[SILVER] >= 2) {
             $ret['buttons'][] = 'Confirm';
-            $ret['selectable']['Confirm'] = array();
+            $ret['selectable']['Confirm'] = [];
         }
         $ret['buttons'][] = 'Pass';
-        $ret['selectable']['Pass'] = array();
+        $ret['selectable']['Pass'] = [];
         if ($this->isUndoAvailable()) {
             $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
+            $ret['selectable']['Undo'] = [];
         }
         return $ret;
     }
@@ -2147,7 +2179,7 @@ class ARCPlayer
      */
     function filterCosts($costs)
     {
-        $filtered = array();
+        $filtered = [];
 
         foreach ($costs as $c => $cost) {
             if ($this->checkCost($cost)) {
@@ -2224,7 +2256,7 @@ class ARCPlayer
      */
     function updateVP($final = false)
     {
-        $ret = array();
+        $ret = [];
         $ret[0] = $this->player_name;
         if (strlen($ret[0]) > 4) {
             $ret[0] = substr($ret[0], 0, 3) . ".";
@@ -2364,18 +2396,18 @@ class ARCPlayer
      */
     function argfara($parg1, $parg2)
     {
-        $ret = array();
-        $ret['selectable'] = array();
-        $ret['buttons'] = array();
+        $ret = [];
+        $ret['selectable'] = [];
+        $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} may release 1 imprisoned worker');
         $ret['titleyou'] = clienttranslate('${you} may release 1 imprisoned worker');
 
         $prisoners = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("SELECT count(*) from worker where location = 'prison' and player_id = {$this->player_id}");
         if ($prisoners > 0) {
             $ret['buttons'][] = 'Confirm';
-            $ret['selectable']['Confirm'] = array();
+            $ret['selectable']['Confirm'] = [];
             $ret['buttons'][] = 'Pass';
-            $ret['selectable']['Pass'] = array();
+            $ret['selectable']['Pass'] = [];
         }
         return $ret;
     }

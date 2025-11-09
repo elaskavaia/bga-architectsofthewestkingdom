@@ -784,7 +784,7 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
             switch ($statename) {
                 default:
                     $player_id = $this->getActivePlayerId();
-                    $this->DbQuery("delete from pending where player_id = {$player_id}");
+                    $this->DbQuery("delete from pending where player_id = {$active_player}");
                     $this->gamestate->nextState("zombiePass");
                     break;
             }

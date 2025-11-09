@@ -1,0 +1,30 @@
+{
+  "100": {
+    "name": "Player board side",
+    "values": {
+      "1": {
+        "name": "Symmetric Side",
+        "description": "Play with identical player boards"
+      },
+      "2": {
+        "name": "Asymmetric Side",
+        "description": "Play with board with unique feature",
+        "premium": true,
+        "nobeginner": true
+      }
+    },
+    "default": 1
+  },
+  "101": {
+    "name": "Live scoring",
+    "values": {
+      "1": {
+        "name": "Off"
+      },
+      "2": {
+        "name": "On"
+      }
+    },
+    "default": 1
+  }
+}

@@ -384,32 +384,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
             }
             if (args.selectable) {
               for (var sid in args.selectable) {
-                const undiv = $(sid);
-                undiv.classList.add("selectable");
-                const info = args.selectable[sid];
-                if (info.selectable) {
-                  for (let subitem in info.selectable) {
-                    const div = $(subitem);
-                    if (div) {
-                      div.classList.add("selectable_later");
-                      this.updateTooltip(subitem);
-                    }
-                  }
-                }
-                this.applyUnselectable(sid, info);
+                this.markSelectableRec(sid, args.selectable[sid], 0);
               }
 
               if (!args.selectable["Confirm"]) {
                 $("ebd-body").classList.add("show-actions");
               }
             }
-            if (args.unselectable) {
-              for (var sid in args.unselectable) {
-                const undiv = $(sid);
-                undiv.classList.add("unselectable");
-                this.applyUnselectable(sid, args.unselectable[sid]);
-              }
-            }
+
             this.args = args;
             this.selected = null;
 
@@ -434,26 +416,26 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       }
     },
 
-    applyUnselectable: function (sid, info) {
+    markSelectableRec: function (sid, info, level = 0) {
       const undiv = $(sid);
       if (!undiv) return;
       if (typeof info === "string" && info) {
         undiv.dataset.err = _(info);
-      } else if (info.unselectable) {
-        const combinedErrors = {};
-        for (let subitem in info.unselectable) {
-          const div = $(subitem);
-          if (div) {
-            div.classList.add("unselectable");
-            div.dataset.err = _(info.unselectable[subitem]);
-            combinedErrors[div.dataset.err] = 1;
-            this.updateTooltip(subitem);
-          }
-        }
-
-        undiv.dataset.err = Array.from(Object.keys(combinedErrors)).join(", ");
+        undiv.classList.add("unselectable");
+      } else if (info.err) {
+        undiv.dataset.err = info.err;
+        undiv.classList.add("unselectable");
       } else {
         undiv.dataset.err = "";
+        if (level == 0) undiv.classList.add("selectable");
+        else {
+          undiv.classList.add("selectable_later");
+        }
+      }
+      if (info.selectable) {
+        for (let subitem in info.selectable) {
+          this.markSelectableRec(subitem, info.selectable[subitem], level + 1);
+        }
       }
 
       this.updateTooltip(sid);
