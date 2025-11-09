@@ -47,7 +47,7 @@ class ARCPlayer
         $ret['title'] = clienttranslate('${actplayer} must confirm their action');
         $ret['titleyou'] = clienttranslate('${you} must confirm your action');
 
-        $workerleft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'reserve_{$this->player_id}'");
+        $workerleft = $this->countWorkersInReserve($this->player_id);
 
         if ($workerleft == 0) {
             $ret['titleyou'] = clienttranslate('<i class="fa fa-exclamation-triangle"></i>&nbsp;WARNING : You do not have any worker left&nbsp;<i class="fa fa-exclamation-triangle"></i>');
@@ -102,11 +102,14 @@ class ARCPlayer
         $game = ArchitectsOfTheWestKingdom::$instance;
         $ret = [];
         $ret['selectable'] = [];
-
+        $workerleft = $this->countWorkersInReserve($this->player_id);
+        $ret['workers'] = $workerleft;
         $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must play a worker');
-        $ret['titleyou'] = clienttranslate('${you} must play a worker');
-
+        if ($workerleft <= 5)
+            $ret['titleyou'] = clienttranslate('${you} must play a worker (${workers} left)');
+        else
+            $ret['titleyou'] = clienttranslate('${you} must play a worker');
         foreach (['quarry', 'forest', 'silversmith', 'mines1', 'storehouse', "workshop1", "workshop2"] as $action) {
             $index = (int) filter_var($action, FILTER_SANITIZE_NUMBER_INT);
             $act = str_replace($index, "", $action);
@@ -204,6 +207,8 @@ class ARCPlayer
         $player_id = $this->player_id;
         $game = ArchitectsOfTheWestKingdom::$instance;
         $confirmTurn = ($game->userPreferences->get($player_id, 101) ?? 1);
+        $workerleft = $this->countWorkersInReserve($this->player_id);
+        if ($workerleft <= 1) $confirmTurn = 1; // do not skip confirm if not workers left
 
         if ($confirmTurn != 0)
             $game->addPending($player_id, "confirmation");
@@ -863,6 +868,7 @@ class ARCPlayer
             }
         }
 
+        $ret['void'] = !$canbuild;
 
         if (!$canbuild) {
             $ret['err'] = clienttranslate("Cannot build neither Cathedral nor any Buildings");
@@ -1010,7 +1016,7 @@ class ARCPlayer
         $ret['title'] = clienttranslate('${actplayer} must return one worker');
         $ret['titleyou'] = clienttranslate('${you} must return one worker');
 
-        $workerleft = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'reserve_{$this->player_id}'");
+        $workerleft = $this->countWorkersInReserve($this->player_id);
 
         if ($workerleft == 0) {
             $workers = ArchitectsOfTheWestKingdom::$instance->getCollectionFromDb("select * from worker where player_id = {$this->player_id} and location not like 'reserve%' and location not like 'blackmarket%' and location not like 'prison%' and location <> 'guildhall'");
@@ -1024,6 +1030,11 @@ class ARCPlayer
         }
 
         return $ret;
+    }
+
+    function countWorkersInReserve($player_id)
+    {
+        return ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'reserve_{$player_id}'");
     }
 
     /**
