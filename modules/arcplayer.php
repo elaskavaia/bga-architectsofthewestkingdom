@@ -203,10 +203,12 @@ class ARCPlayer
     {
         $player_id = $this->player_id;
         $game = ArchitectsOfTheWestKingdom::$instance;
-        $confirmTurn = ($game->userPreferences->get($player_id, 101) ?? 1) != 0;
-        if ($confirmTurn)
-            $game->addPending($this->player_id, "confirmation");
-        $game->addPending($this->player_id, "discardBuilding");
+        $confirmTurn = ($game->userPreferences->get($player_id, 101) ?? 1);
+
+        if ($confirmTurn != 0)
+            $game->addPending($player_id, "confirmation");
+
+        $game->addPending($player_id, "discardBuilding");
 
         $index = (int) filter_var($varg1, FILTER_SANITIZE_NUMBER_INT);
         $action = str_replace($index, "", substr($varg1, 3));
