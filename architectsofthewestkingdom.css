@@ -261,12 +261,12 @@ html {
   border-radius: 53px;
 }
 #page-content .selectable {
-  border: solid 2px magenta;
+  border: solid 2px #33e51c;
 }
 
 .building.selectable,
 .apprentice.selectable {
-  filter: drop-shadow(1px 1px 17px magenta);
+  filter: drop-shadow(1px 1px 10px #33e51c);
 }
 
 .selectable_later {
