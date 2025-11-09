@@ -336,7 +336,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
     //                  You can use this method to perform some user interface changes at this moment.
     //
     onEnteringState: function (stateName, oargs) {
-      console.log("onEnteringState", stateName, oargs);
+      console.log("onEn", stateName, oargs);
       dojo.query(".selectable").removeClass("selectable");
       dojo.query(".unselectable").removeClass("unselectable");
       dojo.query(".selectable_later").removeClass("selectable_later");
@@ -344,24 +344,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
 
       switch (stateName) {
         case "playerDraft":
-          if (this.isCurrentPlayerActive() && args.selectCards != null) {
-            this.args = args;
-            this.selected = null;
-            for (var card_id in args.selectCards) {
-              var card = args.selectCards[card_id];
-              if (card["card_location"] == "selectCards" + this.player_id) {
-                this.addBuilding(card);
-              }
-            }
-            dojo.query(".lowerlaneselect").removeClass("hidden");
-            if (args.selectable != null) {
-              for (var sid in args.selectable) {
-                dojo.query("#" + sid).addClass("selectable");
-              }
-            }
-          } else {
-            dojo.query(".lowerlaneselect").addClass("hidden");
-          }
+          this.setUpDraft(args);
           break;
 
         case "playerTurn":
@@ -445,13 +428,39 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
     //                 You can use this method to perform some user interface changes at this moment.
     //
     onLeavingState: function (stateName) {
-      $("ebd-body").classList.remove("show-actions");
-
       switch (stateName) {
         case "playerDraft":
-          dojo.empty("selectCards" + this.player_id);
-          dojo.query(".lowerlaneselect").addClass("hidden");
+          this.cleanUpDraft();
           break;
+      }
+      $("ebd-body").classList.remove("show-actions");
+    },
+
+    cleanUpDraft: function () {
+      dojo.query(".selectable").removeClass("selectable");
+      dojo.empty("selectCards" + this.player_id);
+      dojo.query(".lowerlaneselect").addClass("hidden");
+    },
+
+    setUpDraft: function (args) {
+      this.cleanUpDraft();
+      if (this.isCurrentPlayerActive() && args?.selectCards) {
+        this.args = args;
+        this.selected = null;
+        for (var card_id in args.selectCards) {
+          var card = args.selectCards[card_id];
+          if (card["card_location"] == "selectCards" + this.player_id) {
+            this.addBuilding(card);
+          }
+        }
+        dojo.query(".lowerlaneselect").removeClass("hidden");
+        if (args.selectable != null) {
+          for (var sid in args.selectable) {
+            dojo.query("#" + sid).addClass("selectable");
+          }
+        }
+      } else {
+        dojo.query(".lowerlaneselect").addClass("hidden");
       }
     },
 
@@ -459,6 +468,12 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
     //                        action status bar (ie: the HTML links in the status bar).
     //
     onUpdateActionButtons: function (stateName, args) {
+      console.log("onUp", stateName, args);
+      switch (stateName) {
+        case "playerDraft":
+          this.setUpDraft(args);
+          break;
+      }
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
           case "playerTurn":
@@ -792,7 +807,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       }
 
       if (this.selected != null) {
-        dojo.query(".selectable").removeClass("selectable");
         this.ajaxcall(
           "/architectsofthewestkingdom/architectsofthewestkingdom/actSelect.html",
           {
@@ -808,7 +822,6 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
         this.selected = selectedTargetId;
 
         if (this.args.selectable[this.selected]["target"] == null) {
-          dojo.query(".selectable").removeClass("selectable");
           this.ajaxcall(
             "/architectsofthewestkingdom/architectsofthewestkingdom/actSelect.html",
             {

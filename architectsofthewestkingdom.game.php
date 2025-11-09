@@ -261,14 +261,84 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
     //////////// Utility functions
     ////////////    
 
-    function checkArgs($arg1, $arg2)
+    // ------ ERROR HANDLING ----------
+    /**
+     * This will throw an exception if condition is false.
+     * The message should be translated and shown to the user.
+     *
+     * @param $message string
+     *            user side error message, translation is needed, use clienttranslate() when passing string to it (because it needs to be marked but this method will wrap it into _)
+     * @param $cond boolean
+     *            condition of assert
+     * @throws BgaUserException
+     */
+    function userAssertTrue($message, $cond = false)
+    {
+        if ($cond) {
+            return;
+        }
+
+        throw new BgaUserException($message);
+    }
+
+    /**
+     * This will throw an exception if condition is false.
+     * This only can happened if user hacks the game, client must prevent this
+     *
+     * @param string $log
+     *            server side log message, no translation needed
+     * @param bool $cond
+     *            condition of assert
+     * @throws BgaUserException
+     */
+    function systemAssertTrue($log, $cond = false, ?string $logonly = null)
+    {
+        if ($cond) {
+            return;
+        }
+        if ($logonly) {
+            $this->error($logonly);
+        }
+        throw new BgaUserException("Internal Error. That should not have happened. Reload page and Retry [$log]");
+    }
+
+
+    function checkArgs($arg1, $arg2 = null)
     {
         $ret = $this->argPlayerTurn();
+        $this->systemAssertTrue("Data validation ERR2", is_string($arg1));
+        $this->systemAssertTrue("Data validation ERR6", $arg1);
+        $selectable = $ret['selectable'] ?? null;
+        $this->systemAssertTrue("Data validation ERR1", is_array($selectable));
+        $info = $selectable[$arg1] ?? null;
 
-        if (!in_array($arg1, array_keys($ret['selectable'])) && !in_array($arg1, $ret['buttons'])) {
-            throw new feException("Not a valid move");
-        } else if ($arg2 != null && (!is_array($ret['selectable'][$arg1]['target']) || !in_array($arg2, $ret['selectable'][$arg1]['target']))) {
-            throw new feException("Not a valid target");
+        if ($info !== null) {
+            if (is_string($info)) {
+                $this->userAssertTrue($info);
+            }
+            $err = $info['err'] ?? '';
+            if ($err) {
+                $this->userAssertTrue($err);
+                return;
+            }
+            $this->userAssertTrue("Not a valid move", is_array($info));
+        } else {
+            $info = $ret['buttons'] ?? [];
+            if (!in_array($arg1, $info))
+                $this->userAssertTrue("Not a valid move");
+        }
+
+        //$this->systemAssertTrue(json_encode($arg1) . "," . json_encode($arg2));
+
+        if ($arg2 && $arg1 != $arg2) {
+            $this->systemAssertTrue("Data validation ERR3", is_string($arg2));
+            $this->systemAssertTrue("Data validation ERR4", is_array($info));
+            $targets =  $targets['target'] ?? [];
+            $this->systemAssertTrue("Data validation ERR5", is_array($targets));
+            if (!in_array($arg2, $targets)) {
+                $this->userAssertTrue("Not a valid target");
+                return;
+            }
         }
     }
 
@@ -320,11 +390,12 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
      * Call pending action
      * @param $execute - false - just check if execution required, true - execute
      */
-    function callPending($pending, bool $execute, $arg1 = null, $arg2 = null)
+    function callPending($pending, bool $execute, $arg1 = null, $arg2 = null, $player_id = null)
     {
+        if ($player_id == null) $player_id = $this->getActivePlayerId();
         if (class_exists($pending['function'])) {
             $obj = new $pending['function']();
-            $obj->player_id = $this->getActivePlayerId();
+            $obj->player_id = $player_id;
             if ($pending['player_id'] != null) {
                 $obj->player_id = $pending['player_id'];
             }
@@ -456,7 +527,30 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
         $this->notify->all("message", $message, $args);
     }
 
+    /**
+     * to easily test the zombie code.
+     */
+    public function debug_playAutomatically(int $moves = 1)
+    {
+        $count = 0;
+        while (intval($this->gamestate->getCurrentMainStateId()) < 99 && $count < $moves) {
+            $count++;
+            foreach ($this->gamestate->getActivePlayerList() as $playerId) {
+                $playerId = (int)$playerId;
+                $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+            }
+        }
+    }
+    public function debug_playAutomatically1()
+    {
+        return $this->debug_playAutomatically(1);
+    }
 
+    public function debug_zombify()
+    {
+        $player_id = $this->getCurrentPlayerId();
+        ArchitectsOfTheWestKingdom::$instance->DbQuery("update player set player_zombie = 1 where player_id = " . $player_id);
+    }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -504,7 +598,15 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
         $pending =  $this->getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
         $arg = $this->callPending($pending, false);
 
+
         return $arg;
+    }
+
+    function argPending()
+    {
+        return [
+            '_no_notify' => true
+        ];
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -782,9 +884,37 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
 
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
+                case "playerTurn":
+                    //Zombie will make a randome choice
+                    $pending =  $this->getObjectFromDB("SELECT* FROM pending order by id desc limit 1");
+                    $arg = $this->callPending($pending, false, null, null, $active_player);
+                    if (count($arg) == 0) {
+                        $this->clearPending($active_player);
+                        $this->gamestate->nextState("zombiePass");
+                        return;
+                    }
+                    $choices = $arg['selectable'] ?? [];
+                    unset($choices['Undo']);
+                    foreach ($choices as $key => $info) {
+                        if (is_string($info)) {
+                            unset($choices[$key]);
+                        } else if (is_array($info)) {
+                            if ($info['err'] ?? '') {
+                                unset($choices[$key]);
+                            }
+                        }
+                    }
+                    if (count($choices) == 0) {
+                        $this->clearPending($active_player);
+                        $this->gamestate->nextState("zombiePass");
+                        return;
+                    }
+                    $choices = array_keys($choices);
+                    $zombieChoice = $choices[bga_rand(0, count($choices) - 1)];
+                    $this->actSelect($zombieChoice, '');
+                    break;
                 default:
-                    $player_id = $this->getActivePlayerId();
-                    $this->DbQuery("delete from pending where player_id = {$active_player}");
+                    $this->clearPending($active_player);
                     $this->gamestate->nextState("zombiePass");
                     break;
             }
@@ -800,6 +930,11 @@ class ArchitectsOfTheWestKingdom extends \Bga\GameFramework\Table
         }
 
         throw new feException("Zombie mode not supported at this game state: " . $statename);
+    }
+
+    function clearPending($player_id)
+    {
+        $this->DbQuery("delete from pending where player_id = {$player_id}");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////:
