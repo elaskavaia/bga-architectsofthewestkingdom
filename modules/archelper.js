@@ -776,5 +776,102 @@ define(["dojo", "dojo/_base/declare"], function (dojo, declare) {
         19: { name: _("Bertha") },
       };
     },
+    createImageTooltip: function (image, title, text, loc = "") {
+      const html = `<div class="anatooltip" data-location="${loc}">
+		  <div class="tt-image">${image}</div>
+		    <div class="tt-text">
+        <div class="tt-title">${title}</div>
+        ${text}
+        <p class="error-condition"><b>${_("Action")}</b>: <span class="error-text"><span></p>
+		    </div>
+
+		  </div>`;
+      return html;
+    },
+    createTextTooltip: function (title, text, actionslot = false) {
+      let action = "";
+      if (actionslot) {
+        action = ` <p class="error-condition"><b>${_("Action")}</b>: <span class="error-text"><span></p>`;
+      }
+      const html = `<div class="anatooltip">
+		    <div class="tt-text">
+        <div class="tt-title">${title}</div>
+        ${text}
+        ${action}
+		    </div>
+		  </div>`;
+      return html;
+    },
+
+    createNewTextTooltip: function (targetId) {
+      const text = _(this.tooltips[targetId]);
+      let name = "";
+
+      if (targetId.startsWith("act")) {
+        const ref = targetId.substr(3);
+        const loc = ref.replace(/\d+/g, "").toLowerCase();
+        const boardName = this.boards[loc];
+        if (boardName) name = _(boardName);
+      }
+      let actionslot = !!name;
+      const html = this.createTextTooltip(
+        name,
+        `
+        <p>${text}</p>
+        `,
+        actionslot
+      );
+      return html;
+    },
+
+    createCardTooltip: function (card, targetId) {
+      if (targetId.startsWith("building")) {
+        return this.createBuildingTooltip(card, targetId);
+      }
+      if (targetId.startsWith("apprentice")) {
+        return this.createApprenticeTooltip(card, targetId);
+      }
+      return "?";
+    },
+    createBuildingTooltip: function (card, targetId) {
+      const helpnode = this.buildings[card["card_type"]];
+      const name = _(helpnode.name);
+      const tooltip = _(helpnode.tooltip);
+      const skill = _(this.skills[helpnode.requirement]);
+      const cardImage = gameui.format_block("jstpl_building", card);
+      const loc = card.card_location.replace(/\d+/g, "");
+      return this.createImageTooltip(
+        cardImage,
+        name,
+        `
+		     <p><b>${_("Ability")}</b>: ${tooltip}</p>
+			   <p><b>${_("Skills Requirement")}</b>: ${skill}</p>
+			   <p><b>${_("VP")}</b>: ${helpnode.vp}</p>
+        `,
+        loc
+      );
+    },
+    createApprenticeTooltip: function (card, targetId) {
+      const helpnode = this.apprentices[card["card_type"]];
+      const name = _(helpnode.name);
+      const tooltip = _(helpnode.tooltip);
+      const skill = _(this.skills[helpnode.skill]);
+      let location = "";
+      if (helpnode.target) {
+        location = `<p><b>${_("Location")}</b>: ${_(helpnode.target)}</p>`;
+      }
+      const loc = card.card_location.replace(/\d+/g, "");
+      const cardImage = gameui.format_block("jstpl_apprentice", card);
+      return this.createImageTooltip(
+        cardImage,
+        name,
+        `
+		    <p><b>${_("Ability")}</b>: ${tooltip}</p>
+			  <p><b>${_("Skill")}</b>: ${skill}</p>
+			  ${location}
+        `,
+        loc
+      );
+    },
   });
 });

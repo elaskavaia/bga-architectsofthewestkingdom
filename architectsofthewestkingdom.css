@@ -123,6 +123,7 @@ html {
   border-radius: 10px;
   margin-top: 10px;
   padding: 5px;
+  flex: none;
 }
 
 .playeroverall {
@@ -256,15 +257,25 @@ html {
   transition: 0.5s;
 }
 
+#page-content .action {
+  border-radius: 53px;
+}
+#page-content .selectable {
+  border: solid 2px magenta;
+}
+
 .building.selectable,
 .apprentice.selectable {
-  border: solid 2px magenta;
   filter: drop-shadow(1px 1px 17px magenta);
 }
 
 .selectable_later {
-  outline: solid 2px green;
+  border: solid 2px green;
 }
+.unselectable {
+  border: solid 2px gray;
+}
+
 .selectable_later::after {
   content: "\f00c";
   position: absolute;
@@ -982,11 +993,6 @@ html {
   pointer-events: auto !important;
 }
 
-.action.selectable {
-  border: solid 2px magenta;
-  border-radius: 53px;
-}
-
 .selectable:hover {
   transform-origin: center;
   transform: scale(1.1);
@@ -1345,19 +1351,15 @@ html {
   top: 256px;
 }
 
-.dijitTooltipContainer .apprentice,
-.dijitTooltipContainer .building {
-  pointer-events: none;
-  position: relative;
-  margin: auto;
-}
-
 .anatooltip {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-direction: row;
-  gap: 10px;
+  display: block;
+  position: relative;
+}
+.anatooltip > * {
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  pointer-events: none;
 }
 
 .score .arcicon.resmeeple {
@@ -1379,19 +1381,52 @@ html {
   top: 295px;
 }
 
-.anattbuilding,
-.anattapprentice {
-  height: 410px;
-  width: 250px;
-}
-.ttleft {
-  flex: none;
+.midSizeDialog {
+  max-width: 600px;
+  min-width: 260px;
 }
 
-.anatooltip .apprentice,
-.anatooltip .building {
+.tundra .dijitTooltipContainer,
+.dijitTooltipContainer {
+  background: #ecd3b5;
+}
+
+.tt-image {
+  height: 410px;
+  width: 250px;
+  padding: 5px;
+}
+.tt-image .apprentice,
+.tt-image .building {
+  transform-origin: top left;
   transform: scale(1.5);
-  transform-origin: top;
+}
+.tt-text {
+  width: 240px;
+  padding: 5px;
+}
+.tt-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-family: "official";
+  font-size: 20px;
+}
+.error-text[data-ready="false"] {
+  color: red;
+}
+.error-text[data-ready="true"] {
+  color: green;
+}
+#ebd-body .error-condition {
+  display: none;
+}
+
+#ebd-body.show-actions .error-condition {
+  display: block;
+}
+
+.anatooltip[data-location="cards"] .error-condition {
+  display: none;
 }
 
 #score {
@@ -1435,11 +1470,13 @@ html {
   font-size: 40px;
   position: absolute;
   right: 0px;
+  top: 0px;
   color: white;
-  background-color: #ffffff88;
-  border: solid 1px white;
+  /* background-color: #ffffff88; 
+  border: solid 1px white;*/
   border-radius: 58px;
   padding: 5px;
+  z-index: 100;
 }
 
 #zoom:hover {

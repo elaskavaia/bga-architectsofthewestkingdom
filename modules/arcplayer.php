@@ -86,6 +86,7 @@ class ARCPlayer
     {
         $ret = array();
         $ret['selectable'] = array();
+        $ret['unselectable'] = array();
         $ret['buttons'] = array();
         $ret['title'] = clienttranslate('${actplayer} must play a worker');
         $ret['titleyou'] = clienttranslate('${you} must play a worker');
@@ -101,31 +102,49 @@ class ARCPlayer
         $argguildhall = $this->argguildhall($parg1, $parg2);
         if (!$argguildhall['void']) {
             $ret['selectable']["actguildhall"] = $argguildhall;
+        } else {
+            $ret['unselectable']["actguildhall"] = $argguildhall;
         }
 
 
         if ($this->checkCost($this->getCost("towncenter", 1))) {
             $ret['selectable']["acttowncenter"] = array();
+        } else {
+            $ret['unselectable']["acttowncenter"] = clienttranslate('Not enough coins');
         }
 
         if (ArchitectsOfTheWestKingdom::$instance->getGameStateValue('tax') > 0) {
             $ret['selectable']["acttaxstand"] = array();
+        } else {
+            $ret['unselectable']["acttaxstand"] = clienttranslate('No tax coins to collect');
         }
 
         if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison_{$this->player_id}'") > 0) {
             $ret['selectable']["actguardhouse1"] = array();
+        } else {
+            $ret['unselectable']["actguardhouse1"] = clienttranslate('No workers in your dungeon');
         }
 
         if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location = 'prison' and player_id={$this->player_id}") > 0) {
             $ret['selectable']["actguardhouse2"] = array();
+        } else {
+            $ret['unselectable']["actguardhouse2"] = clienttranslate('No workers in the prison');
         }
 
         if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location like 'prison_%' and player_id={$this->player_id}") > 0) {
             $ret['selectable']["actguardhouse3"] = array();
+        } else {
+            $ret['unselectable']["actguardhouse3"] = clienttranslate('No your workers in other players\' dungeons');
         }
 
-        if ($this->checkCost($this->getCost("guardhouse", 4)) && ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from debt where paid = 0 and player_id={$this->player_id}") > 0) {
-            $ret['selectable']["actguardhouse4"] = array();
+        if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from debt where paid = 0 and player_id={$this->player_id}") > 0) {
+            if ($this->checkCost($this->getCost("guardhouse", 4))) {
+                $ret['selectable']["actguardhouse4"] = array();
+            } else {
+                $ret['unselectable']["actguardhouse4"] = clienttranslate('Not enough resources to pay off debt');
+            }
+        } else {
+            $ret['unselectable']["actguardhouse4"] = clienttranslate('No outstanding debts');
         }
 
         if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location='mines' and player_id={$this->player_id}") > 0) {
@@ -143,6 +162,11 @@ class ARCPlayer
             if (ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from worker where location='blackmarketc'") == 0 && $this->checkCost($this->getCost("blackmarketc"))) {
                 $ret['selectable']["actblackmarketc"] = array();
             }
+        } else {
+            $ret['unselectable']["actblackmarketa"] = clienttranslate('Virtue too high to access the Black Market');
+            $ret['unselectable']["actblackmarketb1"] = clienttranslate('Virtue too high to access the Black Market');
+            $ret['unselectable']["actblackmarketb2"] = clienttranslate('Virtue too high to access the Black Market');
+            $ret['unselectable']["actblackmarketc"] = clienttranslate('Virtue too high to access the Black Market');
         }
 
         return $ret;
@@ -750,6 +774,7 @@ class ARCPlayer
     {
         $ret = array();
         $ret['selectable'] = array();
+        $ret['unselectable'] = array();
         $ret['buttons'] = array();
         $ret['title'] = clienttranslate('${actplayer} may construct a Building or work on the Cathedral');
         $ret['titleyou'] = clienttranslate('${you} may construct a Building or work on the Cathedral');
@@ -764,18 +789,31 @@ class ARCPlayer
                 if ($this->type == 0) {
                     if ($this->checkCost($this->minusCost($objbuilding->cost, W)) || $this->checkCost($this->minusCost($objbuilding->cost, S))) {
                         $ret['selectable']["building" . $building['card_id']] = array();
+                    } else {
+                        $ret['unselectable']["building" . $building['card_id']] = clienttranslate('Not enough resources');
                     }
                 } else if ($this->checkCost($objbuilding->cost)) {
                     $ret['selectable']["building" . $building['card_id']] = array();
+                } else {
+                    $ret['unselectable']["building" . $building['card_id']] = clienttranslate('Not enough resources');
                 }
+            } else {
+                $ret['unselectable']["building" . $building['card_id']] = clienttranslate('Not enough skills');
             }
         }
-
-        if ($this->cathedral < 5 && $this->virtue > 4) {
+        if ($this->cathedral >= 5) {
+            $ret['unselectable']['actcathedral'] = clienttranslate('Cathedral is already completed');
+        } else   if ($this->virtue <= 4) {
+            $ret['unselectable']['actcathedral'] = clienttranslate('Virtue is too low to work on the Cathedral');
+        } else {
             $spotFilled = ArchitectsOfTheWestKingdom::$instance->getUniqueValueFromDB("select count(*) from player where cathedral = 1+ {$this->cathedral}");
             $spotstot = ArchitectsOfTheWestKingdom::$instance->cathedralSpots[$this->cathedral + 1];
 
-            if ((count($buildings) > 0 || $this->type == 6) && $spotFilled < $spotstot) {
+            if (count($buildings) == 0 && $this->type != 6) {
+                $ret['unselectable']['actcathedral'] = clienttranslate('You don\'t have a building to discard to work on cathedral');
+            } else  if ($spotFilled >= $spotstot) {
+                $ret['unselectable']['actcathedral'] = clienttranslate('All spots in Cathedral are filled');
+            } else {
                 $costs = ArchitectsOfTheWestKingdom::$instance->cathedralCosts[$this->cathedral + 1];
                 if ($this->type == 0) {
                     $reducs = array();
@@ -787,16 +825,19 @@ class ARCPlayer
                 }
                 if (count($this->filterCosts($costs)) > 0) {
                     $ret['selectable']['actcathedral'] = array();
+                } else {
+                    $ret['unselectable']['actcathedral'] = clienttranslate('Not enough resources');
                 }
             }
         }
 
         $ret['void'] = count($ret['selectable']) == 0;
 
-        if ($this->isUndoAvailable()) {
-            $ret['buttons'][] = 'Undo';
-            $ret['selectable']['Undo'] = array();
-        }
+        //undo is always available here
+
+        $ret['buttons'][] = 'Undo';
+        $ret['selectable']['Undo'] = array();
+
 
 
 

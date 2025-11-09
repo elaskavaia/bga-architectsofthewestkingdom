@@ -3,12 +3,15 @@
 <div id="hand_wrapper">
   <!-- hand area has to be outside of zoom-wrapper to float properly -->
 </div>
+<div id="top-overall">
+		<div id="zoom" class="zoom-control"><i class="fa fa-search-plus" aria-hidden="true"></i></div>
+</div>
 <div id="zoom-wrapper">
 <div id="gboard">
 	<div id="newRound" class="popit hidden" >Black Market Reset</div>
 	<div class="board" id="board">	
 
-		<div id="zoom" class=""><i class="fa fa-search-plus" aria-hidden="true"></i></div>
+
 		
 		<div class="officialtext btext" id="txtguildhall">MAISON DES CORPORATIONS</div>
 		<div class="officialtext btext" id="txtcathedral">CATHEDRALE</div>
@@ -218,9 +221,9 @@
 <!-- END zoom-wrapper -->
 </div>
 
+
 <div id="arc-overall">
 </div>
-
 
 
 <script type="text/javascript">

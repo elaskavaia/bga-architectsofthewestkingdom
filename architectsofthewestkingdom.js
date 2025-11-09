@@ -30,20 +30,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       var contentWidth = bodycoords.w;
       var rowWidth = 2000;
       var zoom = this.zoomScales[this.zoomIndex] ?? 1;
+      console.log("zoom", zoom, this.zoomIndex);
 
       rowWidth /= zoom;
-      const zoomWrapper = $("zoom-wrapper");
-      if (contentWidth >= rowWidth) {
-        zoomWrapper.style.transform = undefined;
-        zoomWrapper.style.height = this.height + "px";
-        return;
-      }
-
       var percentageOn1 = contentWidth / rowWidth;
-
-      zoomWrapper.style.transform = "scale(" + percentageOn1 + ")";
-      zoomWrapper.style.height = this.height * percentageOn1 + "px";
       this.writeLocalProp("zoomIndex", String(this.zoomIndex));
+      const zoomWrapper = $("zoom-wrapper");
+      zoomWrapper.style.height = this.height * percentageOn1 + "px";
+      zoomWrapper.style.transform = "scale(" + percentageOn1 + ")";
     },
 
     /*
@@ -62,6 +56,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
     setup: function (gamedatas) {
       this.players = gamedatas.players;
       this.zoomIndex = parseInt(this.readLocalProp("zoomIndex", 0));
+
       var nbp = 0;
       // Setting up player boards
       for (var player_id in gamedatas.players) {
@@ -200,8 +195,9 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
           selectTag.innerHTML = _(boards[trad_id]);
         });
       }
-      for (var trad_id in this.helper.tooltips) {
-        this.addTooltipHtml(trad_id, _(this.helper.tooltips[trad_id]), 1000);
+      for (var targetId in this.helper.tooltips) {
+        const html = this.helper.createNewTextTooltip(targetId);
+        this.addTooltipHtml(targetId, html, 1000);
       }
       dojo.query(".or").forEach(function (selectTag) {
         selectTag.innerHTML = _(translates["or"]);
@@ -293,6 +289,7 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
           this.addTooltip(node.id, "Click to make hand float/static", "");
         });
       }
+      this.addTooltip("zoom", "Zoom control", "Click to zoom out (rotates 4 zoom levels)");
     },
 
     reflowHandPosition: function () {
@@ -338,25 +335,27 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
     // onEnteringState: this method is called each time we are entering into a new game state.
     //                  You can use this method to perform some user interface changes at this moment.
     //
-    onEnteringState: function (stateName, args) {
-      console.log("onEnteringState", stateName, args);
+    onEnteringState: function (stateName, oargs) {
+      console.log("onEnteringState", stateName, oargs);
       dojo.query(".selectable").removeClass("selectable");
+      dojo.query(".unselectable").removeClass("unselectable");
       dojo.query(".selectable_later").removeClass("selectable_later");
+      const args = oargs.args;
 
       switch (stateName) {
         case "playerDraft":
-          if (this.isCurrentPlayerActive() && args.args.selectCards != null) {
-            this.args = args.args;
+          if (this.isCurrentPlayerActive() && args.selectCards != null) {
+            this.args = args;
             this.selected = null;
-            for (var card_id in args.args.selectCards) {
-              var card = args.args.selectCards[card_id];
+            for (var card_id in args.selectCards) {
+              var card = args.selectCards[card_id];
               if (card["card_location"] == "selectCards" + this.player_id) {
                 this.addBuilding(card);
               }
             }
             dojo.query(".lowerlaneselect").removeClass("hidden");
-            if (args.args.selectable != null) {
-              for (var sid in args.args.selectable) {
+            if (args.selectable != null) {
+              for (var sid in args.selectable) {
                 dojo.query("#" + sid).addClass("selectable");
               }
             }
@@ -367,37 +366,54 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
 
         case "playerTurn":
           if (this.isCurrentPlayerActive()) {
-            if (args.args.titleyou != null) {
+            if (args.titleyou != null) {
               $("pagemaintitletext").innerHTML = this.format_string_recursive(
-                _(args.args.titleyou).replace("${you}", this.divYou()).replace("#nb#", args.args.nb).replace("#nb2#", args.args.nb2),
-                args.args
+                _(args.titleyou).replace("${you}", this.divYou()).replace("#nb#", args.nb).replace("#nb2#", args.nb2),
+                args
               );
             }
 
-            if (args.args.selectCards != null) {
-              for (var card_id in args.args.selectCards) {
-                var card = args.args.selectCards[card_id];
+            if (args.selectCards != null) {
+              for (var card_id in args.selectCards) {
+                var card = args.selectCards[card_id];
                 this.addBuilding(card);
               }
               dojo.query(".lowerlaneselect").removeClass("hidden");
             } else {
               dojo.query(".lowerlaneselect").addClass("hidden");
             }
-            if (args.args.selectable != null) {
-              for (var sid in args.args.selectable) {
-                dojo.query("#" + sid).addClass("selectable");
-                const info = args.args.selectable[sid];
-                if (info.selectable)
+            if (args.selectable) {
+              for (var sid in args.selectable) {
+                const undiv = $(sid);
+                undiv.classList.add("selectable");
+                const info = args.selectable[sid];
+                if (info.selectable) {
                   for (let subitem in info.selectable) {
                     const div = $(subitem);
-                    if (div) div.classList.add("selectable_later");
+                    if (div) {
+                      div.classList.add("selectable_later");
+                      this.updateTooltip(subitem);
+                    }
                   }
+                }
+                this.applyUnselectable(sid, info);
+              }
+
+              if (!args.selectable["Confirm"]) {
+                $("ebd-body").classList.add("show-actions");
               }
             }
-            this.args = args.args;
+            if (args.unselectable) {
+              for (var sid in args.unselectable) {
+                const undiv = $(sid);
+                undiv.classList.add("unselectable");
+                this.applyUnselectable(sid, args.unselectable[sid]);
+              }
+            }
+            this.args = args;
             this.selected = null;
 
-            if (args.args.selectCards != null) {
+            if (args.selectCards != null) {
               dojo.query(".lowerlaneselect").removeClass("hidden");
             } else {
               dojo.empty("selectCards" + this.player_id);
@@ -407,13 +423,10 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
               dojo.empty("selectCards" + this.player_id);
             }
             dojo.query(".lowerlaneselect").addClass("hidden");
-            if (args.args.title != null) {
+            if (args.title != null) {
               $("pagemaintitletext").innerHTML = this.format_string_recursive(
-                _(args.args.title)
-                  .replace("${actplayer}", this.divActPlayer())
-                  .replace("#nb#", args.args.nb)
-                  .replace("#nb2#", args.args.nb2),
-                args.args
+                _(args.title).replace("${actplayer}", this.divActPlayer()).replace("#nb#", args.nb).replace("#nb2#", args.nb2),
+                args
               );
             }
           }
@@ -421,17 +434,41 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       }
     },
 
+    applyUnselectable: function (sid, info) {
+      const undiv = $(sid);
+      if (!undiv) return;
+      if (typeof info === "string" && info) {
+        undiv.dataset.err = _(info);
+      } else if (info.unselectable) {
+        const combinedErrors = {};
+        for (let subitem in info.unselectable) {
+          const div = $(subitem);
+          if (div) {
+            div.classList.add("unselectable");
+            div.dataset.err = _(info.unselectable[subitem]);
+            combinedErrors[div.dataset.err] = 1;
+            this.updateTooltip(subitem);
+          }
+        }
+
+        undiv.dataset.err = Array.from(Object.keys(combinedErrors)).join(", ");
+      } else {
+        undiv.dataset.err = "";
+      }
+
+      this.updateTooltip(sid);
+    },
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
     onLeavingState: function (stateName) {
+      $("ebd-body").classList.remove("show-actions");
+
       switch (stateName) {
         case "playerDraft":
           dojo.empty("selectCards" + this.player_id);
           dojo.query(".lowerlaneselect").addClass("hidden");
-          break;
-
-        case "dummmy":
           break;
       }
     },
@@ -528,6 +565,19 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
 
     ///////////////////////////////////////////////////
     //// Utility methods
+
+    /** @Override onScriptError from gameui */
+    onScriptError: function (msg, url, linenumber) {
+      if (gameui.page_is_unloading) {
+        // Don't report errors during page unloading
+        return;
+      }
+      // In anycase, report these errors in the console
+      console.error(msg);
+      // cannot call super - dojo still have to used here
+      //super.onScriptError(msg, url, linenumber);
+      return this.inherited(arguments);
+    },
 
     divYou: function () {
       var color = this.players[this.player_id].color;
@@ -638,6 +688,8 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
     },
 
     addBuilding: function (card) {
+      const targetId = "building" + card["card_id"];
+      if ($(targetId)) dojo.destroy(targetId);
       card["posx"] = (card["card_type"] % 6) * 20;
       card["posy"] = Math.floor(card["card_type"] / 6) * 14.286;
       card["name"] = _(this.helper.buildings[card["card_type"]]["name"]);
@@ -651,25 +703,16 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       }
       dojo.place(this.format_block("jstpl_building", card), $(card.card_location));
       dojo.query("#building" + card["card_id"]).connect("onclick", this, "onSelect");
-
-      const helpnode = this.helper.buildings[card["card_type"]];
-      const name = _(helpnode.name);
-      const tooltip = _(helpnode.tooltip);
-      const skill = _(this.helper.skills[helpnode.requirement]);
-
-      var html = `<div class="anatooltip">
-		  <div class="anattbuilding ttleft">${this.format_block("jstpl_building", card)}</div>
-		  <div class="ttbuilding ttright">
-		    <b>${name}</b><br/>
-		    <p><b>${_("Ability")}</b>: ${tooltip}</p>
-			<p><b>${_("Skills Requirement")}</b>: ${skill}</p>
-			<p><b>${_("VP")}</b>: ${helpnode.vp}</p>
-		  </div>
-		</div>`;
-      this.addTooltipHtml("building" + card["card_id"], html, 1000);
+      $(targetId).dataset.cardSuperType = "building";
+      $(targetId).dataset.cardType = card["card_type"];
+      $(targetId).dataset.cardId = card["card_id"];
+      const html = this.helper.createCardTooltip(card, targetId);
+      this.addTooltipHtml(targetId, html, 1000);
     },
 
     addApprentice: function (card) {
+      const targetId = "apprentice" + card["card_id"];
+      if ($(targetId)) dojo.destroy(targetId);
       card["posx"] = (card["card_type"] % 6) * 20;
       card["posy"] = Math.floor(card["card_type"] / 6) * 14.286;
       card["name"] = _(this.helper.apprentices[card["card_type"]]["name"]);
@@ -680,25 +723,35 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       if (card["bonus"] > 0) {
         dojo.query("#silverbonushead" + card["card_id"]).removeClass("hidden");
       }
+      $(targetId).dataset.cardSuperType = "apprentice";
+      $(targetId).dataset.cardType = card["card_type"];
+      $(targetId).dataset.cardId = card["card_id"];
+      const html = this.helper.createCardTooltip(card, targetId);
+      this.addTooltipHtml(targetId, html, 1000);
+    },
 
-      const helpnode = this.helper.apprentices[card["card_type"]];
-      const name = _(helpnode.name);
-      const tooltip = _(helpnode.tooltip);
-      const skill = _(this.helper.skills[helpnode.skill]);
-      let location = "";
-      if (helpnode.target) {
-        location = `<p><b>${_("Location")}</b>: ${_(helpnode.target)}</p>`;
+    updateTooltip(targetId) {
+      const div = $(targetId);
+      if (!div) return; // ?
+      if (!this.tooltips[targetId]) return;
+      const err = div.dataset.err;
+
+      const fake = document.createElement("div");
+      fake.innerHTML = this.tooltips[targetId].get("label");
+      const et = fake.querySelector(".error-text");
+      if (et) {
+        if (err) {
+          et.innerHTML = err;
+          et.dataset.ready = false;
+        } else {
+          et.innerHTML = _("Ready");
+          et.dataset.ready = true;
+        }
+
+        this.tooltips[targetId].set("label", fake.innerHTML);
+      } else {
+        console.warn("no error text for " + targetId);
       }
-      var html = `<div class="anatooltip">
-		  <div class="anattbuilding ttleft">${this.format_block("jstpl_apprentice", card)}</div>
-		  <div class="ttbuilding ttright">
-		    <b>${name}</b><br/>
-		    <p><b>${_("Ability")}</b>: ${tooltip}</p>
-			<p><b>${_("Skill")}</b>: ${skill}</p>
-			${location}
-		  </div>
-		</div>`;
-      this.addTooltipHtml("apprentice" + card["card_id"], html, 1000);
     },
 
     ///////////////////////////////////////////////////
@@ -721,11 +774,38 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
       }
     },
 
-    onSelect: function (evt) {
-      // Preventing default browser reaction
-      dojo.stopEvent(evt);
+    showError: function (log, args) {
+      if (!log) {
+        this.showMoveUnauthorized();
+        return;
+      }
+      if (typeof args == "undefined") {
+        args = {};
+      }
+      args.you = this.divYou();
+      let message = "";
+      if (typeof log == "string") message = this.format_string_recursive(log, args);
+      else message = _(log);
+      this.showMessage(message, "error");
+      console.error(message);
+      return;
+    },
 
-      if (!this.isCurrentPlayerActive() || !evt.currentTarget.classList.contains("selectable")) {
+    onSelect: function (event) {
+      // Preventing default browser reaction
+      dojo.stopEvent(event);
+      if (!this.isCurrentPlayerActive()) {
+        return;
+      }
+      const selectedTarget = event.currentTarget;
+      const selectedTargetId = selectedTarget?.id;
+
+      if (selectedTarget.classList.contains("unselectable")) {
+        this.showError(selectedTarget.dataset.err);
+        return;
+      }
+
+      if (!selectedTarget.classList.contains("selectable")) {
         return;
       }
 
@@ -736,14 +816,14 @@ define(["dojo", "dojo/_base/declare", "ebg/core/gamegui", "ebg/counter", "./modu
           {
             lock: true,
             arg1: this.selected,
-            arg2: event.currentTarget.id,
+            arg2: selectedTargetId,
           },
           this,
           function (result) {},
           function (is_error) {}
         );
       } else {
-        this.selected = event.currentTarget.id;
+        this.selected = selectedTargetId;
 
         if (this.args.selectable[this.selected]["target"] == null) {
           dojo.query(".selectable").removeClass("selectable");
