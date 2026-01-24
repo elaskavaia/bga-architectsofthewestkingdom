@@ -731,7 +731,7 @@ class ARCPlayer
             $obj->addPending("blackmarketreset");
             if ($obj->type == 7) {
                 //ArchitectsOfTheWestKingdom::$instance->addPending($player['player_id'], "fara");
-                $this->fara(null, null, "Confirm", null);
+                $obj->fara(null, null, "Confirm", null);
             }
         }
 
