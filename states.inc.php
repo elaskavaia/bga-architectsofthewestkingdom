@@ -27,18 +27,6 @@ if (!defined('STATE_PLAYER_TURN')) {
 
 
 $machinestates = array(
-
-    // The initial state. Please do not modify.
-    1 => array(
-        "name" => "gameSetup",
-        "description" => "",
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => array("" => 2)
-    ),
-
-    // Note: ID=2 => your first state
-
     STATE_SETUP => array(
         "name" => "setup",
         "description" => '',
@@ -94,16 +82,4 @@ $machinestates = array(
         "possibleactions" => array("select"),
         "transitions" => array("next" => STATE_PENDING, "zombiePass" => STATE_PENDING)
     ),
-
-
-    // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
-
 );
